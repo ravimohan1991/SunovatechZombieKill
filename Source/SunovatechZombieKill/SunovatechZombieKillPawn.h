@@ -16,6 +16,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class UInputAction;
 class UChaosWheeledVehicleMovementComponent;
+class ASunovatechZombieKillStProjectile;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateVehicle, Log, All);
@@ -53,6 +54,10 @@ class ASunovatechZombieKillPawn : public AWheeledVehiclePawn
 
 protected:
 
+	/** Shoot action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* ShootAction;
+
 	/** Steering Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* SteeringAction;
@@ -80,6 +85,14 @@ protected:
 	/** Reset Vehicle Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* ResetVehicleAction;
+
+	/** Projectile class to spawn on shooting */
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	TSubclassOf<ASunovatechZombieKillStProjectile> ProjectileClass;
+
+	/** Sound to play each time we fire */
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
+	USoundBase* FireSound;
 
 	/** Keeps track of which camera is active */
 	bool bFrontCameraActive = false;
@@ -130,6 +143,18 @@ protected:
 	/** Called when the brake lights are turned on or off */
 	UFUNCTION(BlueprintImplementableEvent, Category="Vehicle")
 	void BrakeLights(bool bBraking);
+
+	/** 
+	 * @brief Fires a projectile.
+	 * 
+	 * @note No network play compatible logic
+	 */
+	void Fire();
+
+public:
+	/** Gun muzzle's offset from the characters location */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	FVector MuzzleOffset;
 
 public:
 	/** Returns the front spring arm subobject */
