@@ -15,6 +15,11 @@
 
 /**
  * @brief Draw a basic reticle with HUD
+ * 
+ * @note Seems like from UE5 onwards, new way is to use UUserWidget class for HUD. In this 
+ * project, see USunovatechZombieKillUI and blueprint version. I'll be using old style
+ * HUD system for prototype purpose whilst attempting to learn the new way. Both AHUD
+ * and UUserWidget are playing nicely for now.
  */
 UCLASS()
 class SUNOVATECHZOMBIEKILL_API ASunovatechZombieKillHUD : public AHUD
@@ -22,16 +27,25 @@ class SUNOVATECHZOMBIEKILL_API ASunovatechZombieKillHUD : public AHUD
 	GENERATED_BODY()
 
 public:
+	/**
+	 * @brief A constructor to load up reticle resource and cache that
+	 */
 	ASunovatechZombieKillHUD();
 
-	/** Primary draw call for the HUD */
+	/**
+	 * @brief Primary draw call for the HUD 
+	 */
 	virtual void DrawHUD() override;
 
 private:
-	/** Crosshair asset pointer */
+	/** 
+	 * Crosshair asset pointer for caching
+	 */
 	class FTexture* CrosshairTex;
 
 protected:
-	/** Overridable native event for when play begins for this actor. */
+	/** 
+	 * @brief Overridable native event for when play begins for this actor. 
+	 */
 	virtual void BeginPlay();
 };

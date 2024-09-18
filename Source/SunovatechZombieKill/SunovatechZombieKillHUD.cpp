@@ -11,7 +11,6 @@ ASunovatechZombieKillHUD::ASunovatechZombieKillHUD()
 	// Set the crosshair texture
 	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexObj(TEXT("/Game/UI/FirstPersonCrosshair"));
 	CrosshairTex = Cast<UTexture2D>(CrosshairTexObj.Object)->GetResource();
-
 }
 
 void ASunovatechZombieKillHUD::DrawHUD()
