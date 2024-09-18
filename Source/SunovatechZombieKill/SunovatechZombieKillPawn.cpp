@@ -22,8 +22,8 @@ ASunovatechZombieKillPawn::ASunovatechZombieKillPawn()
 	FrontSpringArm->SetupAttachment(GetMesh());
 	FrontSpringArm->TargetArmLength = 0.0f;
 	FrontSpringArm->bDoCollisionTest = false;
-	FrontSpringArm->bEnableCameraRotationLag = true;
-	FrontSpringArm->CameraRotationLagSpeed = 15.0f;
+	FrontSpringArm->bEnableCameraRotationLag = false;
+	//FrontSpringArm->CameraRotationLagSpeed = 15.0f;
 	FrontSpringArm->SetRelativeLocation(FVector(30.0f, 0.0f, 120.0f));
 
 	FrontCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Front Camera"));
@@ -36,13 +36,14 @@ ASunovatechZombieKillPawn::ASunovatechZombieKillPawn()
 	BackSpringArm->TargetArmLength = 650.0f;
 	BackSpringArm->SocketOffset.Z = 150.0f;
 	BackSpringArm->bDoCollisionTest = false;
-	BackSpringArm->bInheritPitch = false;
+	BackSpringArm->bInheritPitch = true;
 	BackSpringArm->bInheritRoll = false;
-	BackSpringArm->bEnableCameraRotationLag = true;
-	BackSpringArm->CameraRotationLagSpeed = 2.0f;
-	BackSpringArm->CameraLagMaxDistance = 50.0f;
+	BackSpringArm->bEnableCameraRotationLag = false;
+	//BackSpringArm->CameraRotationLagSpeed = 2.0f;
+	//BackSpringArm->CameraLagMaxDistance = 50.0f;
 
 	BackCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Back Camera"));
+
 	BackCamera->SetupAttachment(BackSpringArm);
 
 	// Configure the car mesh
@@ -170,10 +171,24 @@ void ASunovatechZombieKillPawn::StopHandbrake(const FInputActionValue& Value)
 void ASunovatechZombieKillPawn::LookAround(const FInputActionValue& Value)
 {
 	// get the flat angle value for the input 
-	float LookValue = Value.Get<float>();
+	// float LookValue = Value.Get<float>();
 
 	// add the input
-	BackSpringArm->AddLocalRotation(FRotator(0.0f, LookValue, 0.0f));
+	// BackSpringArm->AddLocalRotation(FRotator(0.0f, LookValue, 0.0f));
+	// 
+	// input is a Vector2D
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	UE_LOG(LogTemp, Log, TEXT("LookAxisVector is: (%f, %f)"), LookAxisVector.X, LookAxisVector.Y);
+
+	if (Controller != nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Attempting rotate controller Yaw and Pitch"));
+
+		// add yaw and pitch input to controller
+		AddControllerYawInput(LookAxisVector.X);
+		AddControllerPitchInput(LookAxisVector.Y);
+	}
 }
 
 void ASunovatechZombieKillPawn::ToggleCamera(const FInputActionValue& Value)
