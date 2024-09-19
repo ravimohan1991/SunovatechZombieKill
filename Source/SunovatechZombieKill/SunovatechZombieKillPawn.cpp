@@ -11,6 +11,7 @@
 #include "InputActionValue.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
 #include "SunovatechZombieKill/SunovatechZombieKillStProjectile.h"
+#include "SunovatechZombieKill/SunovatechZombieKillHUD.h"
 #include "Kismet/GameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "VehiclePawn"
@@ -113,7 +114,7 @@ void ASunovatechZombieKillPawn::Tick(float Delta)
 
 void ASunovatechZombieKillPawn::Fire()
 {
-	UE_LOG(LogTemp, Log, TEXT("Attempting fire"));
+	//UE_LOG(LogTemp, Log, TEXT("Attempting fire"));
 
 	// try and play the sound if specified
 	if (FireSound)
@@ -128,18 +129,30 @@ void ASunovatechZombieKillPawn::Fire()
 		{
 			APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
-			const FRotator MuzzleRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+			if(PlayerController && PlayerController->GetHUD())
+			{
+				ASunovatechZombieKillHUD* NativeHUD = Cast<ASunovatechZombieKillHUD>(PlayerController->GetHUD());
 
-			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the vehicle pawn location to find the final muzzle position
-			const FVector MuzzleLocation = GetActorLocation() + MuzzleRotation.RotateVector(MuzzleOffset);
+				if(NativeHUD)
+				{
+					FVector2D ReticleCoordinates = NativeHUD->GetReticleCoordinates();
+					FVector FireDirection;
+					FVector TempLocation;
 
-			//Set Spawn Collision Handling Override
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-			ActorSpawnParams.Instigator = this;
+					PlayerController->DeprojectScreenPositionToWorld(ReticleCoordinates.X, ReticleCoordinates.Y, TempLocation, FireDirection);
 
-			// spawn the projectile at the muzzle
-			World->SpawnActor<ASunovatechZombieKillStProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
+					const FRotator MuzzleRotation = FireDirection.Rotation(); //PlayerController->PlayerCameraManager->GetCameraRotation();
+					const FVector MuzzleLocation = GetActorLocation() + MuzzleRotation.RotateVector(MuzzleOffset);
+
+					//Set Spawn Collision Handling Override
+					FActorSpawnParameters ActorSpawnParams;
+					ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+					ActorSpawnParams.Instigator = this;
+
+					// spawn the projectile at the muzzle
+					World->SpawnActor<ASunovatechZombieKillStProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
+				}
+			}
 		}
 	}
 }

@@ -37,11 +37,24 @@ public:
 	 */
 	virtual void DrawHUD() override;
 
+	/**
+	 * Getter for reticle coordinates
+	 */
+	 FVector2D& GetReticleCoordinates() { return ReticleCoordinates; }
+
 private:
 	/** 
 	 * Crosshair asset pointer for caching
 	 */
 	class FTexture* CrosshairTex;
+
+	/** Caching reticle position*/
+	FVector2D ReticleCoordinates;
+
+protected:
+	/** Offset from center of screen for reticle */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	FVector2D OffsetFromCenter;
 
 protected:
 	/** 
