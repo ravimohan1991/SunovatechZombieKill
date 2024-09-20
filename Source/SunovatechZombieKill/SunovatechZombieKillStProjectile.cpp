@@ -32,14 +32,14 @@ ASunovatechZombieKillStProjectile::ASunovatechZombieKillStProjectile()
 
 	// Die after 3 seconds by default
 	InitialLifeSpan = 3.0f;
+	InflictedDamage = 25.0f;
 }
 
 // Called when the game starts or when spawned
 void ASunovatechZombieKillStProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionComp->OnComponentHit.AddDynamic(this, &ASunovatechZombieKillStProjectile::OnHit);// for some reason hits are registered when bound like this.
-
+	//CollisionComp->OnComponentHit.AddDynamic(this, &ASunovatechZombieKillStProjectile::OnHit);// for some reason hits are registered when bound like this.
 }
 
 void ASunovatechZombieKillStProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -54,7 +54,13 @@ void ASunovatechZombieKillStProjectile::OnHit(UPrimitiveComponent* HitComp, AAct
 		HitFromDirection = GetActorRotation().Vector();
 	}
 
-	UGameplayStatics::ApplyPointDamage(OtherActor, 100, HitFromDirection, Hit, GetInstigatorController(), this, UDamageType::StaticClass());
-	Destroy();// Can add explosion effects here
+	UGameplayStatics::ApplyPointDamage(OtherActor, InflictedDamage, HitFromDirection, Hit, GetInstigatorController(), this, UDamageType::StaticClass());
+
+	if (ZombieHitEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ZombieHitEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+	}
+
+	Destroy();
 }
 

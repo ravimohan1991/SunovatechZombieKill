@@ -50,6 +50,15 @@ public:
 	/** Returns ProjectileMovement subobject **/
 	FORCEINLINE class UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
+public:
+	/** The amount of damage to be done by this projectile */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay")
+	float InflictedDamage;
+
+	/** Zombie hit effects */
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UParticleSystem* ZombieHitEffect;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
