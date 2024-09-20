@@ -194,7 +194,7 @@ public:
 	bool IsAlive() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	virtual bool IsSprinting() const;
+	bool IsSprinting() const;
 
 	/* Is player aiming down sights */
 	UFUNCTION(BlueprintCallable, Category = "Targeting")
@@ -283,9 +283,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	/* Server side call to update actual sprint state */
-	UFUNCTION(Server, Reliable, WithValidation)
+	/* Server side call to update actual sprint state yet not multiplayer. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "GamePlay")
 	void ServerSetSprinting(bool NewSprinting);
+
+	//void ServerSetSprinting_Implementation(bool NewSprinting);
 
 	UFUNCTION()
 	void OnRep_LastTakeHitInfo();
@@ -299,25 +301,22 @@ protected:
 	void OnHearNoise(APawn* PawnInstigator, const FVector& Location, float Volume);
 
 	/* Deal damage to the Actor that was hit by the punch animation */
-	UFUNCTION(BlueprintCallable, Category = "Attacking")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attacking")
 	void PerformMeleeStrike(AActor* HitActor);
 
-	UFUNCTION(BlueprintCallable, Reliable, NetMulticast)
-	void SimulateMeleeStrike();
-
-	void SimulateMeleeStrike_Implementation();
+	//void PerformMeleeStrike_Implementation(AActor* HitActor);
 
 	/* Update the vocal loop of the zombie (idle, wandering, hunting) */
-	UFUNCTION(Reliable, NetMulticast)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "GameExperience")
 	void BroadcastUpdateAudioLoop(bool bNewSensedTarget);
 
-	void BroadcastUpdateAudioLoop_Implementation(bool bNewSensedTarget);
+	//void BroadcastUpdateAudioLoop_Implementation(bool bNewSensedTarget);
 
 	UAudioComponent* PlayCharacterSound(USoundCue* CueToPlay);
 
-	void ServerSetSprinting_Implementation(bool NewSprinting);
+	//void ServerSetSprinting_Implementation(bool NewSprinting);
 
-	bool ServerSetSprinting_Validate(bool NewSprinting);
+	//bool ServerSetSprinting_Validate(bool NewSprinting);
 
 	/************************************************************************/
 	/* Targeting                                                            */
@@ -325,15 +324,14 @@ protected:
 
 	void SetTargeting(bool NewTargeting);
 
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "GamePlay")
 	void ServerSetTargeting(bool NewTargeting);
 
 	void ServerSetTargeting_Implementation(bool NewTargeting);
 
-	bool ServerSetTargeting_Validate(bool NewTargeting);
 
 	/* Take damage & handle death */
-	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
+	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser);
 
 	virtual bool CanDie(float KillingDamage, FDamageEvent const& DamageEvent, AController* Killer, AActor* DamageCauser) const;
 
@@ -341,13 +339,13 @@ protected:
 
 	virtual void OnDeath(float KillingDamage, FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser);
 
-	virtual void FellOutOfWorld(const class UDamageType& DmgType) override;
+	virtual void FellOutOfWorld(const class UDamageType& DmgType);
 
 	void SetRagdollPhysics();
 
 	virtual void PlayHit(float DamageTaken, struct FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser, bool bKilled);
 
-	void ReplicateHit(float DamageTaken, struct FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser, bool bKilled);
+	//void ReplicateHit(float DamageTaken, struct FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser, bool bKilled);
 
 
 public:	
