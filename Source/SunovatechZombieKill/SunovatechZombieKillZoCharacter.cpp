@@ -175,12 +175,6 @@ void ASunovatechZombieKillZoCharacter::SetBotType(EBotBehaviorType NewType)
 	BroadcastUpdateAudioLoop(bSensedTarget);
 }
 
-// Called to bind functionality to input
-void ASunovatechZombieKillZoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
 UAudioComponent* ASunovatechZombieKillZoCharacter::PlayCharacterSound(USoundCue* CueToPlay)
 {
 	if(CueToPlay)

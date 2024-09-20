@@ -12,7 +12,7 @@ ASunovatechZombieKillStProjectile::ASunovatechZombieKillStProjectile()
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	CollisionComp->InitSphereRadius(5.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
-	//CollisionComp->OnComponentHit.AddDynamic(this, &AAsteroidGameBullet::OnHit);	
+	CollisionComp->OnComponentHit.AddDynamic(this, &ASunovatechZombieKillStProjectile::OnHit);
 
 	// Players can't walk on it
 	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
