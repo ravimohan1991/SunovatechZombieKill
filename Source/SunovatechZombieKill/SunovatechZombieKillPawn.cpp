@@ -157,6 +157,45 @@ void ASunovatechZombieKillPawn::Fire()
 	}
 }
 
+bool ASunovatechZombieKillPawn::IsAlive() const
+{
+	return Health > 0;
+}
+
+float ASunovatechZombieKillPawn::GetHealth() const
+{
+	return Health;
+}
+
+float ASunovatechZombieKillPawn::PlayerHurt(float DamageAmount)
+{
+	if (Health <= 0.f)
+	{
+		return 0.f;
+	}
+
+	if (DamageAmount > 0.f)
+	{
+		Health -= DamageAmount;
+		if (Health <= 0)
+		{
+			// Handle death
+		}
+		else
+		{
+			// Not dead yet
+		}
+	}
+
+	return DamageAmount;
+}
+
+float ASunovatechZombieKillPawn::GetMaxHealth() const
+{
+	// Retrieve the default value of the health property that is assigned on instantiation.
+	return GetClass()->GetDefaultObject<ASunovatechZombieKillPawn>()->Health;
+}
+
 void ASunovatechZombieKillPawn::Steering(const FInputActionValue& Value)
 {
 	// get the input magnitude for steering

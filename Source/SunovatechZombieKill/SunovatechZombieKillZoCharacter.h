@@ -11,136 +11,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Engine/DamageEvents.h"
+#include "SunovatechZombieKillStProjectile.h"
 
 #include "SunovatechZombieKillZoCharacter.generated.h"
 
 class USoundCue;
-
-// Alternate of STypes.h
-
-UENUM()
-enum class EInventorySlot : uint8
-{
-	/* For currently equipped items/weapons */
-	Hands,
-
-	/* For primary weapons on spine bone */
-	Primary,
-
-	/* Storage for small items like flashlight on pelvis */
-	Secondary,
-};
-
-
-UENUM()
-enum class EBotBehaviorType : uint8
-{
-	/* Does not move, remains in place until a player is spotted */
-	Passive,
-
-	/* Patrols a region until a player is spotted */
-	Patrolling,
-};
-
-
-USTRUCT()
-struct FTakeHitInfo
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY()
-	float ActualDamage;
-
-	UPROPERTY()
-	UClass* DamageTypeClass;
-
-	UPROPERTY()
-	TWeakObjectPtr<class ACharacter> PawnInstigator;
-
-	UPROPERTY()
-	TWeakObjectPtr<class AActor> DamageCauser;
-
-	UPROPERTY()
-	uint8 DamageEventClassID;
-
-	UPROPERTY()
-	bool bKilled;
-
-private:
-
-	UPROPERTY()
-	uint8 EnsureReplicationByte;
-
-	UPROPERTY()
-	FDamageEvent GeneralDamageEvent;
-
-	UPROPERTY()
-	FPointDamageEvent PointDamageEvent;
-
-	UPROPERTY()
-	FRadialDamageEvent RadialDamageEvent;
-
-public:
-	FTakeHitInfo()
-		: ActualDamage(0),
-		DamageTypeClass(nullptr),
-		PawnInstigator(nullptr),
-		DamageCauser(nullptr),
-		DamageEventClassID(0),
-		bKilled(false),
-		EnsureReplicationByte(0)
-	{}
-
-	FDamageEvent& GetDamageEvent()
-	{
-		switch (DamageEventClassID)
-		{
-		case FPointDamageEvent::ClassID:
-			if (PointDamageEvent.DamageTypeClass == nullptr)
-			{
-				PointDamageEvent.DamageTypeClass = DamageTypeClass ? DamageTypeClass : UDamageType::StaticClass();
-			}
-			return PointDamageEvent;
-
-		case FRadialDamageEvent::ClassID:
-			if (RadialDamageEvent.DamageTypeClass == nullptr)
-			{
-				RadialDamageEvent.DamageTypeClass = DamageTypeClass ? DamageTypeClass : UDamageType::StaticClass();
-			}
-			return RadialDamageEvent;
-
-		default:
-			if (GeneralDamageEvent.DamageTypeClass == nullptr)
-			{
-				GeneralDamageEvent.DamageTypeClass = DamageTypeClass ? DamageTypeClass : UDamageType::StaticClass();
-			}
-			return GeneralDamageEvent;
-		}
-	}
-
-
-	void SetDamageEvent(const FDamageEvent& DamageEvent)
-	{
-		DamageEventClassID = DamageEvent.GetTypeID();
-		switch (DamageEventClassID)
-		{
-		case FPointDamageEvent::ClassID:
-			PointDamageEvent = *((FPointDamageEvent const*)(&DamageEvent));
-			break;
-		case FRadialDamageEvent::ClassID:
-			RadialDamageEvent = *((FRadialDamageEvent const*)(&DamageEvent));
-			break;
-		default:
-			GeneralDamageEvent = DamageEvent;
-		}
-	}
-
-	void EnsureReplication()
-	{
-		EnsureReplicationByte++;
-	}
-};
 
 UCLASS()
 class SUNOVATECHZOMBIEKILL_API ASunovatechZombieKillZoCharacter : public ACharacter
@@ -184,13 +59,13 @@ public:
 	/* Health                                                               */
 	/************************************************************************/
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	UFUNCTION(BlueprintCallable, Category = "ZombieSituation")
 	float GetMaxHealth() const;
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	UFUNCTION(BlueprintCallable, Category = "ZombieSituation")
 	float GetHealth() const;
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	UFUNCTION(BlueprintCallable, Category = "ZombieSituation")
 	bool IsAlive() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
@@ -225,7 +100,7 @@ public:
 
 	/* The thinking part of the brain, steers our zombie and makes decisions based on the data we feed it from the Blackboard */
 	/* Assigned at the Character level (instead of Controller) so we may use different zombie behaviors while re-using one controller. */
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UPROPERTY(EditAnywhere, Category = "AI")
 	class UBehaviorTree* BehaviorTree;
 
 protected:
@@ -233,20 +108,24 @@ protected:
 	float SprintingSpeedModifier;
 
 	/* Character wants to run, checked during Tick to see if allowed */
-	UPROPERTY(Transient, Replicated)
+	UPROPERTY(Transient)
 	bool bWantsToRun;
 
-	UPROPERTY(Transient, Replicated)
+	UPROPERTY(Transient)
 	bool bIsTargeting;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
 	float TargetingSpeedModifier;
 
-	/* Holds hit data to replicate hits and death to clients */
+	/** 
+	 * @brief Holds hit data to replicate hits and death to clients.
+	 * 
+	 * @note We are not doing multiplayer yet. 
+	 */
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_LastTakeHitInfo)
 	struct FTakeHitInfo LastTakeHitInfo;
 
-	UPROPERTY(EditDefaultsOnly, Category = "PlayerCondition", Replicated)
+	UPROPERTY(EditDefaultsOnly, Category = "ZombieSituation")
 	float Health;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Attacking")

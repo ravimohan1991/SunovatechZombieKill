@@ -94,6 +94,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	USoundBase* FireSound;
 
+	/** Player health */
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
+	float Health;
+
 	/** Keeps track of which camera is active */
 	bool bFrontCameraActive = false;
 
@@ -111,6 +115,30 @@ public:
 	virtual void Tick(float Delta) override;
 
 	// End Actor interface
+
+	/************************************************************************/
+	/* Health (taken from ASunovatechZombieKillZoCharacter)                 */
+	/* Probabbly could make a native health component                       */
+	/************************************************************************/
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	float GetMaxHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	float GetHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	bool IsAlive() const;
+
+	/**
+	 * @brief A very experimental routine with the assumption that damage inflictor are zombies only.
+	 * Typically you would want APawn::TakeDamage or something like that. This routine will be used
+	 * for zombie's melee attack
+	 * 
+	 * @note Different from usual practice
+	 */
+	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	float PlayerHurt(float DamageAmount);
 
 protected:
 

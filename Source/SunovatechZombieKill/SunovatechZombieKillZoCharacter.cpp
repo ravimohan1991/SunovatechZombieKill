@@ -14,6 +14,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerState.h"
+#include "SunovatechZombieKillAIController.h"
 
 // Sets default values
 ASunovatechZombieKillZoCharacter::ASunovatechZombieKillZoCharacter()
@@ -42,6 +43,8 @@ ASunovatechZombieKillZoCharacter::ASunovatechZombieKillZoCharacter()
 	PawnSensingComp->SightRadius = 2000;
 	PawnSensingComp->HearingThreshold = 600;
 	PawnSensingComp->LOSHearingThreshold = 1200;
+	PawnSensingComp->OnSeePawn.AddDynamic(this, &ASunovatechZombieKillZoCharacter::OnSeePlayer);
+	PawnSensingComp->OnHearNoise.AddDynamic(this, &ASunovatechZombieKillZoCharacter::OnHearNoise);
 
 	/* Ignore this (Weapon Collision, needs thinking) channel or it will absorb the trace impacts instead of the skeletal mesh */
 	//GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_OverlapAll_Deprecated COLLISION_WEAPON, ECR_Ignore);
@@ -75,11 +78,11 @@ void ASunovatechZombieKillZoCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	/* This is the earliest moment we can bind our delegates to the component */
-	if(PawnSensingComp)
+	/*if (PawnSensingComp)
 	{
 		PawnSensingComp->OnSeePawn.AddDynamic(this, &ASunovatechZombieKillZoCharacter::OnSeePlayer);
 		PawnSensingComp->OnHearNoise.AddDynamic(this, &ASunovatechZombieKillZoCharacter::OnHearNoise);
-	}
+	}*/
 
 	BroadcastUpdateAudioLoop(bSensedTarget);
 
@@ -101,7 +104,17 @@ void ASunovatechZombieKillZoCharacter::Tick(float DeltaTime)
 	if(bSensedTarget && (GetWorld()->TimeSeconds - LastSeenTime) > SenseTimeOut
 		&& (GetWorld()->TimeSeconds - LastHeardTime) > SenseTimeOut)
 	{
-		// Zombie controller logic MISSING FOR UNTILL CLASS IS CREATED
+		ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
+		if(AIController)
+		{
+			bSensedTarget = false;
+
+			/* Reset controller in effect*/
+			AIController->SetTargetEnemy(nullptr);
+
+			/* Stop playing the hunting sound */
+			BroadcastUpdateAudioLoop(false);
+		}
 	}
 }
 
@@ -121,7 +134,11 @@ void ASunovatechZombieKillZoCharacter::OnSeePlayer(APawn* Pawn)
 	LastSeenTime = GetWorld()->GetTimeSeconds();
 	bSensedTarget = true;
 
-	// Zombie controller logic MISSING FOR UNTILL CLASS IS CREATED
+	ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
+	if(Pawn && /*Pawn->isalive*/ AIController)
+	{
+		AIController->SetTargetEnemy(Pawn);
+	}
 }
 
 
@@ -163,14 +180,22 @@ void ASunovatechZombieKillZoCharacter::OnHearNoise(APawn* PawnInstigator, const 
 	bSensedTarget = true;
 	LastHeardTime = GetWorld()->GetTimeSeconds();
 
-	// Zombie controller logic MISSING FOR UNTILL CLASS IS CREATED
+	ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
+	if(AIController)
+	{
+		AIController->SetTargetEnemy(PawnInstigator);
+	}
 }
 
 void ASunovatechZombieKillZoCharacter::SetBotType(EBotBehaviorType NewType)
 {
 	BotType = NewType;
 
-	// Zombie controller logic MISSING FOR UNTILL CLASS IS CREATED
+	ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
+	if(AIController)
+	{
+		AIController->SetBlackboardBotType(NewType);
+	}
 
 	BroadcastUpdateAudioLoop(bSensedTarget);
 }

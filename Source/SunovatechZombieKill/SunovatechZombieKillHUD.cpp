@@ -6,6 +6,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Engine.h"
 #include "Kismet/GameplayStatics.h"
+#include "SunovatechZombieKill/SunovatechZombieKillPawn.h"
 
 ASunovatechZombieKillHUD::ASunovatechZombieKillHUD()
 {
@@ -35,6 +36,22 @@ void ASunovatechZombieKillHUD::DrawHUD()
 
 	// draw the reticle
 	Canvas->DrawItem(TileItem);
+
+	// Set the draw color to white
+	Canvas->SetDrawColor(255, 255, 255);
+
+	ASunovatechZombieKillPawn* MyPawn = Cast<ASunovatechZombieKillPawn>(GetOwningPlayerController()->GetPawn());
+	if (MyPawn && TextFont)
+	{
+		float XL, YL;
+
+		// Store the width and length of the text
+		Canvas->StrLen(TextFont, FString("PlayerLife:"), XL, YL);
+
+		// Draw the actual text
+		Canvas->DrawText(TextFont, FString::Printf(TEXT("Health: %d"), MyPawn->GetHealth()), 2 * XL, Canvas->ClipY - 1.5 * YL);
+		//Canvas->DrawText(TextFont, FString::Printf(TEXT("Score: %f"), MyController->GetScore()), 4 * XL, Canvas->ClipY - 1.5 * YL);
+	}
 }
 
 void ASunovatechZombieKillHUD::BeginPlay()
