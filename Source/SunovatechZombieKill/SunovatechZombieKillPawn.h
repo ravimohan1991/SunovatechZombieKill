@@ -33,6 +33,10 @@ class ASunovatechZombieKillPawn : public AWheeledVehiclePawn
 {
 	GENERATED_BODY()
 
+	/* To detect overlap events. */
+	UPROPERTY(VisibleDefaultsOnly, Category = "Zombie Interaction")
+	class USphereComponent* OverlapComp;
+
 	/** Spring Arm for the front camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* FrontSpringArm;
@@ -98,11 +102,37 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	float Health;
 
+	/* Number of zombies melee attacking */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Zombie Interaction")
+	int32 ZombiesAttacking;
+
 	/** Keeps track of which camera is active */
 	bool bFrontCameraActive = false;
 
+	/* Handle to manage the timer */
+	FTimerHandle HurtTimerHandle;
+
 public:
 	ASunovatechZombieKillPawn();
+
+	/**
+	 * Called when this vechicle pawn begins overlaps different actor
+	 *
+	 * Useful to detect the zombie touch (melee) events
+	 *
+	 */
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	/**
+	 * Called when this vechicle pawn ends overlaps different actor
+	 *
+	 * Useful to detect the zombie touch (melee) events
+	 *
+	 */
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 
 	// Begin Pawn interface
 
@@ -138,7 +168,7 @@ public:
 	 * @note Different from usual practice
 	 */
 	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
-	float PlayerHurt(float DamageAmount);
+	float PlayerHurt(float DamageAmount = 1.0f);
 
 protected:
 

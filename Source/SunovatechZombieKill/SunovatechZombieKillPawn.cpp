@@ -13,6 +13,8 @@
 #include "SunovatechZombieKill/SunovatechZombieKillStProjectile.h"
 #include "SunovatechZombieKill/SunovatechZombieKillHUD.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/SphereComponent.h"
+#include "SunovatechZombieKillZoCharacter.h"
 
 #define LOCTEXT_NAMESPACE "VehiclePawn"
 
@@ -53,6 +55,18 @@ ASunovatechZombieKillPawn::ASunovatechZombieKillPawn()
 	// get the Chaos Wheeled movement component
 	ChaosVehicleMovement = CastChecked<UChaosWheeledVehicleMovementComponent>(GetVehicleMovement());
 
+	// Use a sphere as a simple collision representation
+	OverlapComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+	OverlapComp->InitSphereRadius(5.0f);
+	OverlapComp->BodyInstance.SetCollisionProfileName("ZombieTouch");
+	OverlapComp->OnComponentBeginOverlap.AddDynamic(this, &ASunovatechZombieKillPawn::OnOverlapBegin);
+	OverlapComp->OnComponentEndOverlap.AddDynamic(this, &ASunovatechZombieKillPawn::OnOverlapEnd);
+
+	// Set as root component
+	RootComponent = OverlapComp;
+
+	Health = 100;
+	ZombiesAttacking = 0;
 }
 
 void ASunovatechZombieKillPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -167,6 +181,53 @@ float ASunovatechZombieKillPawn::GetHealth() const
 	return Health;
 }
 
+void ASunovatechZombieKillPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ASunovatechZombieKillZoCharacter* ZombiePawn = Cast<ASunovatechZombieKillZoCharacter>(OtherActor);
+	if(ZombiePawn)
+	{
+		// Goccha
+		UE_LOG(LogTemp, Log, TEXT("Zombie is overlapping pawn vehicle"));
+
+		if(!GetWorld()->GetTimerManager().IsTimerActive(HurtTimerHandle))
+		{
+			FTimerHandle TimerHandle_AttackDelay = HurtTimerHandle;
+			FTimerDelegate Delegate; // Delegate to bind function with parameters
+			Delegate.BindUFunction(this, "PlayerHurt", ZombiePawn->GetMeleeDamage()); // Character is the parameter we wish to pass with the function.
+
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle_AttackDelay, Delegate, 1.0f, true);
+		}
+		else
+		{
+			
+		}
+		ZombiesAttacking += 1;
+
+		UE_LOG(LogTemp, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
+
+		//FTimerManagerTimerParameters InTimerParameters;
+		//InTimerParameters.bLoop = true;
+
+		//GetWorld()->GetTimerManager().SetTimer(HurtTimerHandle, &ASunovatechZombieKillPawn::PlayerHurt, 1.0f, InTimerParameters);
+	}
+}
+
+void ASunovatechZombieKillPawn::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if(OtherActor && Cast<ASunovatechZombieKillZoCharacter>(OtherActor))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Zombie has stopped overlapping pawn vehicle"));
+
+		ZombiesAttacking -= 1;
+		UE_LOG(LogTemp, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
+
+		if(ZombiesAttacking <= 0)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(HurtTimerHandle);
+		}
+	}
+}
+
 float ASunovatechZombieKillPawn::PlayerHurt(float DamageAmount)
 {
 	if (Health <= 0.f)
@@ -176,7 +237,9 @@ float ASunovatechZombieKillPawn::PlayerHurt(float DamageAmount)
 
 	if (DamageAmount > 0.f)
 	{
-		Health -= DamageAmount;
+		Health -= DamageAmount * ZombiesAttacking;
+		UE_LOG(LogTemp, Log, TEXT("Hurting by the amount %f"), DamageAmount);
+
 		if (Health <= 0)
 		{
 			// Handle death
