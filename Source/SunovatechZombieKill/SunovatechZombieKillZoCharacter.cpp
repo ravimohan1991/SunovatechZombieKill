@@ -61,12 +61,14 @@ ASunovatechZombieKillZoCharacter::ASunovatechZombieKillZoCharacter()
 	AudioLoopComp->SetupAttachment(RootComponent);
 
 	Health = 100;
-	MeleeDamage = 24.0f;
+	MeleeDamage = 4.0f;
 	SprintingSpeedModifier = 2.0f;
 
 	/* By default we will not let the AI patrol, we can override this value per-instance. */
 	BotType = EBotBehaviorType::Passive;
 	SenseTimeOut = 2.5f;
+
+	bSensedTarget = false;
 
 	/* Note: Visual Setup is done in the AI/ZombieCharacter Blueprint file */
 
@@ -104,10 +106,14 @@ void ASunovatechZombieKillZoCharacter::Tick(float DeltaTime)
 	if(bSensedTarget && (GetWorld()->TimeSeconds - LastSeenTime) > SenseTimeOut
 		&& (GetWorld()->TimeSeconds - LastHeardTime) > SenseTimeOut)
 	{
+		UE_LOG(LogTemp, Log, TEXT("Exceeding sensetime out for sight"));
+
 		ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
 		if(AIController)
 		{
 			bSensedTarget = false;
+
+			UE_LOG(LogTemp, Log, TEXT("Setting blackboard target enemy to null"));
 
 			/* Reset controller in effect*/
 			AIController->SetTargetEnemy(nullptr);
@@ -130,6 +136,8 @@ void ASunovatechZombieKillZoCharacter::OnSeePlayer(APawn* Pawn)
 		BroadcastUpdateAudioLoop(true);
 	}
 
+	UE_LOG(LogTemp, Log, TEXT("Inside OnSeePlayer"));
+
 	/* Keep track of the time the player was last sensed in order to clear the target */
 	LastSeenTime = GetWorld()->GetTimeSeconds();
 	bSensedTarget = true;
@@ -137,6 +145,7 @@ void ASunovatechZombieKillZoCharacter::OnSeePlayer(APawn* Pawn)
 	ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
 	if(Pawn && /*Pawn->isalive*/ AIController)
 	{
+		UE_LOG(LogTemp, Log, TEXT("Attempting to set the blackboard value to seen pawn"));
 		AIController->SetTargetEnemy(Pawn);
 	}
 }

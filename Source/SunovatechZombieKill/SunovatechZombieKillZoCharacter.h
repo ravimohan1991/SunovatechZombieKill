@@ -38,12 +38,8 @@ class SUNOVATECHZOMBIEKILL_API ASunovatechZombieKillZoCharacter : public ACharac
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	float SenseTimeOut;
 
-	/* Resets after sense time-out to avoid unnecessary clearing of target each tick */
-	bool bSensedTarget;
-
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UPawnSensingComponent* PawnSensingComp;
-
 
 public:
 	// Sets default values for this character's properties
@@ -104,6 +100,10 @@ public:
 	class UBehaviorTree* BehaviorTree;
 
 protected:
+	/* Resets after sense time-out to avoid unnecessary clearing of target each tick */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	bool bSensedTarget;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float SprintingSpeedModifier;
 
@@ -131,7 +131,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Attacking")
 	TSubclassOf<UDamageType> PunchDamageType;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Attacking")
+	UPROPERTY(EditDefaultsOnly, Category = "Attacking (Interaction)")
 	float MeleeDamage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Attacking")
@@ -230,4 +230,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	// Melee (using overlap)
+	FORCEINLINE float GetMeleeDamage() { return MeleeDamage; }
 };
