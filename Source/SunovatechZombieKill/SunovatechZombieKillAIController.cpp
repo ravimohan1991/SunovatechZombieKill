@@ -62,9 +62,9 @@ void ASunovatechZombieKillAIController::SetTargetEnemy(APawn* NewTarget)
 	if(BlackboardComp)
 	{
 		BlackboardComp->SetValueAsObject(TargetEnemyKeyName, NewTarget);
-		if(NewTarget == nullptr)
+		if(NewTarget == NULL)
 		{
-			UE_LOG(LogTemp, Log, TEXT("NewTarget is nullptr"));
+			UE_LOG(LogTemp, Log, TEXT("NewTarget is NULL"));
 		}
 	}
 }

@@ -15,6 +15,7 @@ ASunovatechZombieKillHUD::ASunovatechZombieKillHUD()
 	CrosshairTex = Cast<UTexture2D>(CrosshairTexObj.Object)->GetResource();
 
 	OffsetFromCenter.X = OffsetFromCenter.Y = 0.0f;
+	HealthDisplayCoordinates.X = HealthDisplayCoordinates.Y = 0.0f;
 }
 
 void ASunovatechZombieKillHUD::DrawHUD()
@@ -44,13 +45,22 @@ void ASunovatechZombieKillHUD::DrawHUD()
 	if (MyPawn && TextFont)
 	{
 		float XL, YL;
+		float ScaleX, ScaleY;
+
+		ScaleX = ScaleY = 2.5f;
 
 		// Store the width and length of the text
 		Canvas->StrLen(TextFont, FString("PlayerLife:"), XL, YL);
 
 		// Draw the actual text
-		Canvas->DrawText(TextFont, FString::Printf(TEXT("Health: %d"), MyPawn->GetHealth()), 2 * XL, Canvas->ClipY - 1.5 * YL);
-		//Canvas->DrawText(TextFont, FString::Printf(TEXT("Score: %f"), MyController->GetScore()), 4 * XL, Canvas->ClipY - 1.5 * YL);
+		if(HealthDisplayCoordinates.X == 0.0f && HealthDisplayCoordinates.Y == 0.0f)
+		{
+			Canvas->DrawText(TextFont, FString::Printf(TEXT("Health: %f"), MyPawn->GetHealth()), 2 * XL * ScaleX, Canvas->ClipY - 1.5 * YL * ScaleY, ScaleX, ScaleY);
+		}
+		else
+		{
+			Canvas->DrawText(TextFont, FString::Printf(TEXT("Health: %f"), MyPawn->GetHealth()), HealthDisplayCoordinates.X, HealthDisplayCoordinates.Y, ScaleX, ScaleY);
+		}
 	}
 }
 

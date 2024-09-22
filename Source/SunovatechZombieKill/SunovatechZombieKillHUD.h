@@ -56,6 +56,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 	FVector2D OffsetFromCenter;
 
+	/** Coordinates for display of Health*/
+	UPROPERTY(EditDefaultsOnly, Category = "Experimental")
+	FVector2D HealthDisplayCoordinates;
+
 	/**
 	* The font of the text diaplayed on the HUD
 	*/

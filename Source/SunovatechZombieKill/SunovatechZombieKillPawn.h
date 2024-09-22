@@ -106,6 +106,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Zombie Interaction")
 	int32 ZombiesAttacking;
 
+	/** Amount of damage to be given cached */
+	//UPROPERTY(BlueprintReadOnly, Category = "Zombie Interaction")
+	//float IndividualZombieDamage;
+
 	/** Keeps track of which camera is active */
 	bool bFrontCameraActive = false;
 
@@ -167,8 +171,8 @@ public:
 	 * 
 	 * @note Different from usual practice
 	 */
-	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
-	float PlayerHurt(float DamageAmount = 1.0f);
+	/*UFUNCTION(BlueprintCallable, Category = "PlayerCondition")*/
+	//float PlayerHurt(/*float DamageAmount = 1.0f*/);
 
 protected:
 
@@ -208,6 +212,9 @@ protected:
 	 * @note No network play compatible logic
 	 */
 	void Fire();
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 public:
 	/** Gun muzzle's offset from the characters location */
