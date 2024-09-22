@@ -33,6 +33,10 @@ class ASunovatechZombieKillPawn : public AWheeledVehiclePawn
 {
 	GENERATED_BODY()
 
+	/* To detect overlap events. */
+	UPROPERTY(VisibleDefaultsOnly, Category = "Zombie Interaction")
+	class USphereComponent* OverlapComp;
+
 	/** Spring Arm for the front camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* FrontSpringArm;
@@ -94,11 +98,45 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	USoundBase* FireSound;
 
+	/** Player health */
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
+	float Health;
+
+	/* Number of zombies melee attacking */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Zombie Interaction")
+	int32 ZombiesAttacking;
+
+	/** Amount of damage to be given cached */
+	//UPROPERTY(BlueprintReadOnly, Category = "Zombie Interaction")
+	//float IndividualZombieDamage;
+
 	/** Keeps track of which camera is active */
 	bool bFrontCameraActive = false;
 
+	/* Handle to manage the timer */
+	FTimerHandle HurtTimerHandle;
+
 public:
 	ASunovatechZombieKillPawn();
+
+	/**
+	 * Called when this vechicle pawn begins overlaps different actor
+	 *
+	 * Useful to detect the zombie touch (melee) events
+	 *
+	 */
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	/**
+	 * Called when this vechicle pawn ends overlaps different actor
+	 *
+	 * Useful to detect the zombie touch (melee) events
+	 *
+	 */
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 
 	// Begin Pawn interface
 
@@ -111,6 +149,30 @@ public:
 	virtual void Tick(float Delta) override;
 
 	// End Actor interface
+
+	/************************************************************************/
+	/* Health (taken from ASunovatechZombieKillZoCharacter)                 */
+	/* Probabbly could make a native health component                       */
+	/************************************************************************/
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	float GetMaxHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	float GetHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
+	bool IsAlive() const;
+
+	/**
+	 * @brief A very experimental routine with the assumption that damage inflictor are zombies only.
+	 * Typically you would want APawn::TakeDamage or something like that. This routine will be used
+	 * for zombie's melee attack
+	 * 
+	 * @note Different from usual practice
+	 */
+	/*UFUNCTION(BlueprintCallable, Category = "PlayerCondition")*/
+	//float PlayerHurt(/*float DamageAmount = 1.0f*/);
 
 protected:
 
@@ -150,6 +212,9 @@ protected:
 	 * @note No network play compatible logic
 	 */
 	void Fire();
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 public:
 	/** Gun muzzle's offset from the characters location */

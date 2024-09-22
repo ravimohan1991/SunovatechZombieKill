@@ -13,6 +13,8 @@
 #include "SunovatechZombieKill/SunovatechZombieKillStProjectile.h"
 #include "SunovatechZombieKill/SunovatechZombieKillHUD.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/SphereComponent.h"
+#include "SunovatechZombieKillZoCharacter.h"
 
 #define LOCTEXT_NAMESPACE "VehiclePawn"
 
@@ -53,6 +55,24 @@ ASunovatechZombieKillPawn::ASunovatechZombieKillPawn()
 	// get the Chaos Wheeled movement component
 	ChaosVehicleMovement = CastChecked<UChaosWheeledVehicleMovementComponent>(GetVehicleMovement());
 
+	// Use a sphere as a simple collision representation
+	OverlapComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+	OverlapComp->SetupAttachment(GetMesh());
+	OverlapComp->InitSphereRadius(5.0f);
+	OverlapComp->BodyInstance.SetCollisionProfileName("ZombieTouch");
+	OverlapComp->OnComponentBeginOverlap.AddDynamic(this, &ASunovatechZombieKillPawn::OnOverlapBegin);
+	OverlapComp->OnComponentEndOverlap.AddDynamic(this, &ASunovatechZombieKillPawn::OnOverlapEnd);
+
+	Health = 100;
+	ZombiesAttacking = 0;
+}
+
+void ASunovatechZombieKillPawn::BeginPlay()
+{
+	Super::BeginPlay();
+
+	Health = 100;
+	UE_LOG(LogTemp, Log, TEXT("Setting initial Health to %f"), Health);
 }
 
 void ASunovatechZombieKillPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -155,6 +175,120 @@ void ASunovatechZombieKillPawn::Fire()
 			}
 		}
 	}
+}
+
+bool ASunovatechZombieKillPawn::IsAlive() const
+{
+	return Health > 0;
+}
+
+float ASunovatechZombieKillPawn::GetHealth() const
+{
+	return Health;
+}
+
+void ASunovatechZombieKillPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ASunovatechZombieKillZoCharacter* ZombiePawn = Cast<ASunovatechZombieKillZoCharacter>(OtherActor);
+	if(ZombiePawn)
+	{
+		// Goccha
+		UE_LOG(LogTemp, Log, TEXT("Zombie is overlapping pawn vehicle"));
+
+		/*if (!GetWorld()->GetTimerManager().IsTimerActive(HurtTimerHandle))
+		{
+			FTimerHandle TimerHandle_AttackDelay = HurtTimerHandle;
+			FTimerDelegate Delegate; // Delegate to bind function with parameters
+			Delegate.BindUFunction(this, "PlayerHurt", ZombiePawn->GetMeleeDamage()); // MeleeDamage is the parameter we wish to pass with the function.
+
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle_AttackDelay, Delegate, 1.0f, true);
+		}
+		else
+		{
+			
+		}*/
+		ZombiesAttacking += 1;
+		float IndividualZombieDamage = ZombiePawn->GetMeleeDamage();
+
+		UE_LOG(LogTemp, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
+
+		//FTimerManagerTimerParameters InTimerParameters;
+		//InTimerParameters.bLoop = true;
+
+		if (!GetWorld()->GetTimerManager().IsTimerActive(HurtTimerHandle))
+		{
+			// https://forums.unrealengine.com/t/how-to-use-settimer-function-with-some-arguments/653415/4
+			GetWorld()->GetTimerManager().SetTimer(HurtTimerHandle, [this, IndividualZombieDamage] {
+				if (Health <= 0.f)
+				{
+					// Hmm
+				}
+
+				if (IndividualZombieDamage > 0.f)
+				{
+					Health -= IndividualZombieDamage * ZombiesAttacking;
+					UE_LOG(LogTemp, Log, TEXT("Hurting by the amount %f"), IndividualZombieDamage * ZombiesAttacking);
+
+					if (Health <= 0)
+					{
+						// Handle death
+					}
+					else
+					{
+						// Not dead yet
+					}
+				}
+				}, 1.0f, true);
+		}
+	}
+}
+
+void ASunovatechZombieKillPawn::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if(OtherActor && Cast<ASunovatechZombieKillZoCharacter>(OtherActor))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Zombie has stopped overlapping pawn vehicle"));
+
+		ZombiesAttacking -= 1;
+		UE_LOG(LogTemp, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
+
+		if(ZombiesAttacking <= 0)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(HurtTimerHandle);
+		}
+	}
+}
+
+/*
+float ASunovatechZombieKillPawn::PlayerHurt()
+{
+	if (Health <= 0.f)
+	{
+		return 0.f;
+	}
+
+	if (IndividualZombieDamage > 0.f)
+	{
+		Health -= IndividualZombieDamage * ZombiesAttacking;
+		UE_LOG(LogTemp, Log, TEXT("Hurting by the amount %f"), IndividualZombieDamage);
+
+		if (Health <= 0)
+		{
+			// Handle death
+		}
+		else
+		{
+			// Not dead yet
+		}
+	}
+
+	return IndividualZombieDamage;
+}*/
+
+float ASunovatechZombieKillPawn::GetMaxHealth() const
+{
+	// Retrieve the default value of the health property that is assigned on instantiation.
+	return GetClass()->GetDefaultObject<ASunovatechZombieKillPawn>()->Health;
 }
 
 void ASunovatechZombieKillPawn::Steering(const FInputActionValue& Value)

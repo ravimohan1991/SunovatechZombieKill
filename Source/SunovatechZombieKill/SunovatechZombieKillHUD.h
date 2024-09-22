@@ -53,8 +53,18 @@ private:
 
 protected:
 	/** Offset from center of screen for reticle */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 	FVector2D OffsetFromCenter;
+
+	/** Coordinates for display of Health*/
+	UPROPERTY(EditDefaultsOnly, Category = "Experimental")
+	FVector2D HealthDisplayCoordinates;
+
+	/**
+	* The font of the text diaplayed on the HUD
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = HUD)
+	UFont* TextFont;
 
 protected:
 	/** 

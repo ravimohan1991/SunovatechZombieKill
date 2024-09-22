@@ -5,8 +5,8 @@
 #include "CanvasItem.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine.h"
-//#include "SunovatechZombieKill/SunovatechZombieKillPawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "SunovatechZombieKill/SunovatechZombieKillPawn.h"
 
 ASunovatechZombieKillHUD::ASunovatechZombieKillHUD()
 {
@@ -15,6 +15,7 @@ ASunovatechZombieKillHUD::ASunovatechZombieKillHUD()
 	CrosshairTex = Cast<UTexture2D>(CrosshairTexObj.Object)->GetResource();
 
 	OffsetFromCenter.X = OffsetFromCenter.Y = 0.0f;
+	HealthDisplayCoordinates.X = HealthDisplayCoordinates.Y = 0.0f;
 }
 
 void ASunovatechZombieKillHUD::DrawHUD()
@@ -26,19 +27,7 @@ void ASunovatechZombieKillHUD::DrawHUD()
 	// find center of the Canvas
 	const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
 
-	/*FVector MuzzleOffset;
-	if(GetOwningPawn())
-	{
-		MuzzleOffset = Cast<ASunovatechZombieKillPawn>(GetOwningPawn())->MuzzleOffset;// for fast prototyping only
-	}
-
-	FVector2D ReticleCoordinates;
-	if(GetOwningPlayerController() && GetOwningPawn())
-	{
-		UGameplayStatics::ProjectWorldToScreen(GetOwningPlayerController(), GetOwningPawn()->GetActorLocation() + MuzzleOffset, ReticleCoordinates);
-	}*/
-
-	// offset by half the texture's dimensions so that the center of the texture aligns with the center of the Canvas
+	// offset by designer specified value
 	const FVector2D CrosshairDrawPosition((Center.X + OffsetFromCenter.X), (Center.Y + OffsetFromCenter.Y));
 
 	ReticleCoordinates = CrosshairDrawPosition;
@@ -48,6 +37,31 @@ void ASunovatechZombieKillHUD::DrawHUD()
 
 	// draw the reticle
 	Canvas->DrawItem(TileItem);
+
+	// Set the draw color to white
+	Canvas->SetDrawColor(255, 255, 255);
+
+	ASunovatechZombieKillPawn* MyPawn = Cast<ASunovatechZombieKillPawn>(GetOwningPlayerController()->GetPawn());
+	if (MyPawn && TextFont)
+	{
+		float XL, YL;
+		float ScaleX, ScaleY;
+
+		ScaleX = ScaleY = 2.5f;
+
+		// Store the width and length of the text
+		Canvas->StrLen(TextFont, FString("PlayerLife:"), XL, YL);
+
+		// Draw the actual text
+		if(HealthDisplayCoordinates.X == 0.0f && HealthDisplayCoordinates.Y == 0.0f)
+		{
+			Canvas->DrawText(TextFont, FString::Printf(TEXT("Health: %f"), MyPawn->GetHealth()), 2 * XL * ScaleX, Canvas->ClipY - 1.5 * YL * ScaleY, ScaleX, ScaleY);
+		}
+		else
+		{
+			Canvas->DrawText(TextFont, FString::Printf(TEXT("Health: %f"), MyPawn->GetHealth()), HealthDisplayCoordinates.X, HealthDisplayCoordinates.Y, ScaleX, ScaleY);
+		}
+	}
 }
 
 void ASunovatechZombieKillHUD::BeginPlay()
