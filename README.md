@@ -17,3 +17,7 @@ Controls (Keyboard and Mouse):
   - TAB = camera switch
   - Mouse left button = shoot
   - Mouse Move = aiming
+
+# Credits
+[Tom Looman](https://github.com/tomlooman/EpicSurvivalGame)
+[Sumo Pune](https://pune.sumo-digital.com/)
