@@ -15,6 +15,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
 #include "SunovatechZombieKillZoCharacter.h"
+#include "SunovatechZombieKill/SunovatechZombieKillPlayerController.h"
+#include "Runtime/Engine/Classes/Camera/CameraActor.h"
+#include "EngineUtils.h"
 
 #define LOCTEXT_NAMESPACE "VehiclePawn"
 
@@ -124,12 +127,6 @@ void ASunovatechZombieKillPawn::Tick(float Delta)
 	// add some angular damping if the vehicle is in midair
 	bool bMovingOnGround = ChaosVehicleMovement->IsMovingOnGround();
 	GetMesh()->SetAngularDamping(bMovingOnGround ? 0.0f : 3.0f);
-
-	// realign the camera yaw to face front
-	//float CameraYaw = BackSpringArm->GetRelativeRotation().Yaw;
-	//CameraYaw = FMath::FInterpTo(CameraYaw, 0.0f, Delta, 1.0f);
-
-	//BackSpringArm->SetRelativeRotation(FRotator(0.0f, CameraYaw, 0.0f));
 }
 
 void ASunovatechZombieKillPawn::Fire()
@@ -195,49 +192,52 @@ void ASunovatechZombieKillPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedCo
 		// Goccha
 		UE_LOG(LogTemp, Log, TEXT("Zombie is overlapping pawn vehicle"));
 
-		/*if (!GetWorld()->GetTimerManager().IsTimerActive(HurtTimerHandle))
-		{
-			FTimerHandle TimerHandle_AttackDelay = HurtTimerHandle;
-			FTimerDelegate Delegate; // Delegate to bind function with parameters
-			Delegate.BindUFunction(this, "PlayerHurt", ZombiePawn->GetMeleeDamage()); // MeleeDamage is the parameter we wish to pass with the function.
-
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle_AttackDelay, Delegate, 1.0f, true);
-		}
-		else
-		{
-			
-		}*/
 		ZombiesAttacking += 1;
 		float IndividualZombieDamage = ZombiePawn->GetMeleeDamage();
 
 		UE_LOG(LogTemp, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
 
-		//FTimerManagerTimerParameters InTimerParameters;
-		//InTimerParameters.bLoop = true;
-
 		if (!GetWorld()->GetTimerManager().IsTimerActive(HurtTimerHandle))
 		{
 			// https://forums.unrealengine.com/t/how-to-use-settimer-function-with-some-arguments/653415/4
 			GetWorld()->GetTimerManager().SetTimer(HurtTimerHandle, [this, IndividualZombieDamage] {
-				if (Health <= 0.f)
-				{
-					// Hmm
-				}
-
-				if (IndividualZombieDamage > 0.f)
-				{
-					Health -= IndividualZombieDamage * ZombiesAttacking;
-					UE_LOG(LogTemp, Log, TEXT("Hurting by the amount %f"), IndividualZombieDamage * ZombiesAttacking);
-
-					if (Health <= 0)
+					if (Health <= 0.f)
 					{
-						// Handle death
+						// This may not occur
+						EndGame();
 					}
-					else
+
+					if (IndividualZombieDamage > 0.f)
 					{
-						// Not dead yet
+						Health -= IndividualZombieDamage * ZombiesAttacking;
+						UE_LOG(LogTemp, Log, TEXT("Hurting by the amount %f"), IndividualZombieDamage * ZombiesAttacking);
+
+						if (Health <= 0)
+						{
+							// Handle death
+							ASunovatechZombieKillPlayerController* Controller = Cast<ASunovatechZombieKillPlayerController>(GetController());
+
+							if(Controller)
+							{
+								// Set the view as per camera
+								for (TActorIterator<ACameraActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+								{
+									Controller->SetViewTargetWithBlend(*ActorItr);
+									break;
+								}
+							}
+
+							DetachFromControllerPendingDestroy();
+							Destroy();
+
+							GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+							EndGame();
+						}
+						else
+						{
+							// Not dead yet
+						}
 					}
-				}
 				}, 1.0f, true);
 		}
 	}
@@ -258,32 +258,6 @@ void ASunovatechZombieKillPawn::OnOverlapEnd(UPrimitiveComponent* OverlappedComp
 		}
 	}
 }
-
-/*
-float ASunovatechZombieKillPawn::PlayerHurt()
-{
-	if (Health <= 0.f)
-	{
-		return 0.f;
-	}
-
-	if (IndividualZombieDamage > 0.f)
-	{
-		Health -= IndividualZombieDamage * ZombiesAttacking;
-		UE_LOG(LogTemp, Log, TEXT("Hurting by the amount %f"), IndividualZombieDamage);
-
-		if (Health <= 0)
-		{
-			// Handle death
-		}
-		else
-		{
-			// Not dead yet
-		}
-	}
-
-	return IndividualZombieDamage;
-}*/
 
 float ASunovatechZombieKillPawn::GetMaxHealth() const
 {
@@ -392,6 +366,10 @@ void ASunovatechZombieKillPawn::ResetVehicle(const FInputActionValue& Value)
 	GetMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
 
 	UE_LOG(LogTemplateVehicle, Error, TEXT("Reset Vehicle"));
+}
+
+void ASunovatechZombieKillPawn::EndGame_Implementation()
+{
 }
 
 #undef LOCTEXT_NAMESPACE

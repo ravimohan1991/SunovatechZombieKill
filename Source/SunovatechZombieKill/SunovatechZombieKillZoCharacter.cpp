@@ -79,13 +79,6 @@ void ASunovatechZombieKillZoCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/* This is the earliest moment we can bind our delegates to the component */
-	/*if (PawnSensingComp)
-	{
-		PawnSensingComp->OnSeePawn.AddDynamic(this, &ASunovatechZombieKillZoCharacter::OnSeePlayer);
-		PawnSensingComp->OnHearNoise.AddDynamic(this, &ASunovatechZombieKillZoCharacter::OnHearNoise);
-	}*/
-
 	BroadcastUpdateAudioLoop(bSensedTarget);
 
 	/* Assign a basic name to identify zombies in the HUD if needed. */
@@ -149,7 +142,6 @@ void ASunovatechZombieKillZoCharacter::OnSeePlayer(APawn* Pawn)
 		AIController->SetTargetEnemy(Pawn);
 	}
 }
-
 
 void ASunovatechZombieKillZoCharacter::PerformMeleeStrike_Implementation(AActor* HitActor)
 {

@@ -215,6 +215,14 @@ protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	/**
+	 * @brief Handles Endgame things to be done which we will do in blueprints
+	 * 
+	 * @note Typically this type of routine belongs to Gamemode
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Gameplay")
+	void EndGame();
 
 public:
 	/** Gun muzzle's offset from the characters location */
