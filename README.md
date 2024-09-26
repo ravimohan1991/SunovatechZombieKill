@@ -8,6 +8,9 @@ You may use Unreal Engine ver 5.4.4 to build the game on Linux and Windows. Chec
 
 Youtube: https://youtu.be/ZBuueHGxC88
 
+# Pondering Pond
+[AI BEHAVIOR IN UNREAL ENGINE](https://ravimohan.net/2024/09/26/ai-behavior-in-unreal-engine/)
+
 # Credits
 - [Tom Looman](https://github.com/tomlooman/EpicSurvivalGame)
 - [Sumo Pune](https://pune.sumo-digital.com/)
