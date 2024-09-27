@@ -1,5 +1,5 @@
 /**
- * @file SunovatechZombieKilWheelRearl.h
+ * @file SunovatechZombieKillWheelRear.h
  * @author Ravi Mohan
  * @brief This file contains USunovatechZombieKillWheelRear. The file was generated from UE by Epic Games and modified by author.
  * @version 1.0

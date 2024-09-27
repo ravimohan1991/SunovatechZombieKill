@@ -17,37 +17,76 @@
 
 class USoundCue;
 
+/**
+ * @brief The zombie character class
+ *
+ * The following are contained
+ * 1. PawnSensingComp - for seeing and hearing enemy
+ * 2. Health
+ * 3. Hit detection and effects like ragdoll on death
+ * 4. Behavior Tree
+ * 5. Sound cues
+ */
 UCLASS()
 class SUNOVATECHZOMBIEKILL_API ASunovatechZombieKillZoCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	/* Tracks noise data used by the pawn sensing component */
+	/**
+	 * @brief Tracks noise data used by the pawn sensing component
+	 */
 	UPawnNoiseEmitterComponent* NoiseEmitterComp;
 
-	/* Last time the player was spotted */
+	/**
+	 * @brief Last time the player was spotted
+	 */
 	float LastSeenTime;
 
-	/* Last time the player was heard */
+	/**
+	 * @brief Last time the player was heard
+	 */
 	float LastHeardTime;
 
-	/* Last time we attacked something */
+	/**
+	 * @brief Last time we attacked something
+	 */
 	float LastMeleeAttackTime;
 
-	/* Time-out value to clear the sensed position of the player. Should be higher than Sense interval in the PawnSense component not never miss sense ticks. */
+	/**
+	 * @brief Time-out value to clear the sensed position of the player. Should be higher than Sense interval in the PawnSense component not never miss sense ticks.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	float SenseTimeOut;
 
+	/**
+	 * @brief SensingComponent encapsulates sensory (ie sight and hearing) settings and functionality for this Actor,
+	 * allowing the actor to see/hear Pawns in the world.
+	 */
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UPawnSensingComponent* PawnSensingComp;
 
 public:
-	// Sets default values for this character's properties
+	/**
+	 * @brief Sets default values for this character's properties.
+	 *
+	 * They include:
+	 * 	1. Setting pawn sensing component
+	 * 	2. Noise emitter component
+	 * 	3. Set up collision
+	 * 	4. Set up audio loop component (needs work in this project, if required)
+	 * 	5. Variable initialization
+	 */
 	ASunovatechZombieKillZoCharacter();
 
+	/**
+	 * @brief The sound to be played when this zombie is hit
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundCue* SoundTakeHit;
 
+	/**
+	 * @brief The sound to be played when zombie is destroyed
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundCue* SoundDeath;
 
@@ -55,35 +94,75 @@ public:
 	/* Health                                                               */
 	/************************************************************************/
 
+	/**
+	 * @brief Getter for initialized health
+	 *
+	 * @return Initial health
+	 */
 	UFUNCTION(BlueprintCallable, Category = "ZombieSituation")
 	float GetMaxHealth() const;
 
+	/**
+	 * @brief Getter for current health
+	 *
+	 * @return Current health
+	 */
 	UFUNCTION(BlueprintCallable, Category = "ZombieSituation")
 	float GetHealth() const;
 
+	/**
+	 * @brief Query about the state of zombie's being
+	 *
+	 * @return True if Health > 0, False otherwise
+	 * @return Ponder over the possiblility of adding Health component instead for ASunovatechZombieKillZoCharacter and ASunovatechZombieKillPawn
+	 */
 	UFUNCTION(BlueprintCallable, Category = "ZombieSituation")
 	bool IsAlive() const;
 
+	/**
+	 * @brief Query about the state of zombie's motion
+	 *
+	 * @return True if enemy has been sensed and zombie has started movement, else, False
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	bool IsSprinting() const;
 
-	/* Is player aiming down sights */
+	/**
+	 * @brief Is player aiming down sights (no practical use, in the project)
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Targeting")
 	bool IsTargeting() const;
 
-	/* Retrieve Pitch/Yaw from current camera */
+	/**
+	 * @brief Retrieve Pitch/Yaw from current camera (no practical use, in the project)
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Targeting")
 	FRotator GetAimOffsets() const;
 
-
-	/* Client/local call to update sprint state  */
+	/**
+	 * @brief Client/local call to update sprint state (no practical use, in the project)
+	 */
 	virtual void SetSprinting(bool NewSprinting);
 
+	/**
+	 * @brief Getter for SprintingSpeedModifier (IDK use)
+	 *
+	 * @brief SprintingSpeedModifier
+	 */
 	float GetSprintingSpeedModifier() const;
 
+	/**
+	 * @brief Getter for TargetingSpeedModifier (IDK use)
+	 *
+	 * @brief TargetingSpeedModifier
+	 */
 	float GetTargetingSpeedModifier() const;
 
-	/* Change default bot type during gameplay */
+	/**
+	 * @brief Change default bot type during gameplay (not currently using this)
+	 *
+	 * @param NewType								The passive or patroling type behavior to be set
+	 */
 	void SetBotType(EBotBehaviorType NewType);
 
 public:
