@@ -222,6 +222,9 @@ protected:
 
 	void SetRagdollPhysics();
 
+	/**
+	 * @brief Routine to play the zombie hit logic concerned with damage
+	 */
 	virtual void PlayHit(float DamageTaken, struct FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser, bool bKilled);
 
 	//void ReplicateHit(float DamageTaken, struct FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser, bool bKilled);

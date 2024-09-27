@@ -310,10 +310,6 @@ float ASunovatechZombieKillZoCharacter::TakeDamage(float Damage, struct FDamageE
 	{
 		return 0.f;
 	}
-
-	/* Modify based on gametype rules. Mutator type functionality, maybe for future */
-	//AGameMode* MyGameMode = Cast<AGameMode>(GetWorld()->GetAuthGameMode());
-	//Damage = MyGameMode ? MyGameMode->Modify
 	
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	if(ActualDamage > 0.f)
