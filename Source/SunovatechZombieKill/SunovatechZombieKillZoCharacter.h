@@ -166,148 +166,316 @@ public:
 	void SetBotType(EBotBehaviorType NewType);
 
 public:
+
+	/**
+	 * @brief Is zombie attacking by punching
+	 *
+	 * @note Not being used in the project currently
+	 */
 	UPROPERTY(BlueprintReadWrite, Category = "Attacking")
 	bool bIsPunching;
 
-	/* The bot behavior we want this bot to execute, (passive/patrol) by specifying EditAnywhere we can edit this value per-instance when placed on the map. */
+	/**
+	 * @brief The bot behavior we want this bot to execute, (passive/patrol) by specifying EditAnywhere
+	 * we can edit this value per-instance when placed on the map.
+	 */
 	UPROPERTY(EditAnywhere, Category = "AI")
 	EBotBehaviorType BotType;
 
-	/* The thinking part of the brain, steers our zombie and makes decisions based on the data we feed it from the Blackboard */
-	/* Assigned at the Character level (instead of Controller) so we may use different zombie behaviors while re-using one controller. */
+	/**
+	 * @brief The thinking part of the brain, steers our zombie and makes decisions based on the data we feed it from the Blackboard
+	 *
+	 * @note Assigned at the Character level (instead of Controller) so we may use different zombie behaviors while re-using one controller.
+	 */
 	UPROPERTY(EditAnywhere, Category = "AI")
 	class UBehaviorTree* BehaviorTree;
 
 protected:
-	/* Resets after sense time-out to avoid unnecessary clearing of target each tick */
+
+	/**
+	 * @brief Resets after sense time-out to avoid unnecessary clearing of target each tick
+	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	bool bSensedTarget;
 
+	/**
+	 * @brief The zombie sprint multiplier.
+	 *
+	 * @note Not being used in the project
+	 * @todo Initialized twice in ASunovatechZombieKillZoCharacter::ASunovatechZombieKillZoCharacter(). Rectify by choosing one.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float SprintingSpeedModifier;
 
-	/* Character wants to run, checked during Tick to see if allowed */
+	/**
+	 * @brief Character wants to run, checked during Tick to see if allowed (not being used in the project)
+	 */
 	UPROPERTY(Transient)
 	bool bWantsToRun;
 
+	/**
+	 * @brief No clue
+	 */
 	UPROPERTY(Transient)
 	bool bIsTargeting;
 
+	/**
+	 * @brief No clue
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
 	float TargetingSpeedModifier;
 
 	/** 
-	 * @brief Holds hit data to replicate hits and death to clients.
-	 * 
+	 * @brief Holds hit data to replicate hits and death to clients. Also used for detecting same frame multiple hits
+	 *
 	 * @note We are not doing multiplayer yet. 
 	 */
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_LastTakeHitInfo)
 	struct FTakeHitInfo LastTakeHitInfo;
 
+	/**
+	 * @brief Current health of zombie
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "ZombieSituation")
 	float Health;
 
+	/**
+	 * @brief The type of damage for zombie's punch (not in use)
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Attacking")
 	TSubclassOf<UDamageType> PunchDamageType;
 
+	/**
+	 * @brief The amount of damage during zombie's melee attack
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Attacking (Interaction)")
 	float MeleeDamage;
 
+	/**
+	 * @brief The animation to be played whilst melee attack is active (not in use)
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Attacking")
 	UAnimMontage* MeleeAnimMontage;
 
+	/************************************************************************/
+	/* Sounds                                                             */
+	/************************************************************************/
+
+	/**
+	 * @brief Sound to be played on spotting player (not in use)
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundCue* SoundPlayerNoticed;
 
+	/**
+	 * @brief Zombie sound when sensed the target (not in use)
+	 *
+	 * @note May become functional once I figure out BroadcastUpdateAudioLoop in this project
+	 * @see ASunovatechZombieKillZoCharacter::BroadcastUpdateAudioLoop_Implementation
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundCue* SoundHunting;
 
+	/**
+	 * @brief Zombie sound when EBotBehaviorType::Passive == BotType is true (not in use)
+	 *
+	 * @see BroadcastUpdateAudioLoop_Implementation
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundCue* SoundIdle;
 
+	/**
+	 * @brief Zombie sound when BotType is set to EBotBehaviorType::Patrolling (not in use)
+	 *
+	 * @see BroadcastUpdateAudioLoop_Implementation
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundCue* SoundWandering;
 
+	/**
+	 * @brief Zombie sound when melee action is being executed (not in use)
+	 *
+	 * @see ASunovatechZombieKillZoCharacter::PerformMeleeStrike
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	USoundCue* SoundAttackMelee;
 
-	/* Plays the idle, wandering or hunting sound */
+	/**
+	 * @brief Plays the idle, wandering, or hunting sound
+	 */
 	UPROPERTY(VisibleAnywhere, Category = "Sound")
 	UAudioComponent* AudioLoopComp;
 
+	/**
+	 * @brief True if OnDeath is called (need to check this)
+	 *
+	 * @see ASunovatechZombieKillZoCharacter::OnDeath
+	 */
 	bool bIsDying;
 
 protected:
-	// Called when the game starts or when spawned
+
+	/**
+	 * @brief A native event for when play begins for this actor
+	 *
+	 * Setting up state for zombie
+	 */
 	virtual void BeginPlay() override;
 
-	/* Server side call to update actual sprint state yet not multiplayer. */
+	/**
+	 * @brief Server side call to update actual sprint state yet not multiplayer.
+	 *
+	 * @note Find appropriate naming for the function
+	 * @todo Naming something more appropriate
+	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "GamePlay")
 	void ServerSetSprinting(bool NewSprinting);
 
-	//void ServerSetSprinting_Implementation(bool NewSprinting);
-
+	/**
+	 * @brief Not sure what this does
+	 *
+	 * @todo Think about the relevance of this function
+	 */
 	UFUNCTION()
 	void OnRep_LastTakeHitInfo();
 
-	/* Triggered by pawn sensing component when a pawn is spotted */
-	/* When using functions as delegates they need to be marked with UFUNCTION(). We assign this function to FSeePawnDelegate */
+	/**
+	 * @brief Triggered by pawn sensing component when a (vehicle) pawn is spotted (sighted).
+	 *
+	 * @param Pawn								The spotted pawn
+	 *
+	 * @note Delegates can call member functions on C++ objects in a generic, type-safe way. A delegate can be bound dynamically to a member function
+	 * of an arbitrary object, calling the function on the object at a future time, even if the caller does not know the object's type
+	 * @note When using functions to attach to delegates, in our case UPawnSensingComponent::OnSeePawn, they need to be marked with UFUNCTION(). We assign this function to FSeePawnDelegate OnSeePawn
+	 */
 	UFUNCTION()
 	void OnSeePlayer(APawn* Pawn);
 
+	/**
+	 * @brief Triggered by pawn sensing component when a (vehicle) pawn is heard (or noise from a vehicle Pawn's PawnNoiseEmitterComponent is heard)
+	 *
+	 * @param PawnInstigator								The pawn emitting the sound
+	 * @param Location										Location where sound happened
+	 * @param Volume										The intensity of sound (decibles?)
+	 */
 	UFUNCTION()
 	void OnHearNoise(APawn* PawnInstigator, const FVector& Location, float Volume);
 
-	/* Deal damage to the Actor that was hit by the punch animation */
+	/**
+	 * @brief Deal damage to the Actor that was hit by the punch animation of the zombie
+	 *
+	 * @param HitActor										The actor to be hurt
+	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attacking")
 	void PerformMeleeStrike(AActor* HitActor);
 
-	//void PerformMeleeStrike_Implementation(AActor* HitActor);
-
-	/* Update the vocal loop of the zombie (idle, wandering, hunting) */
+	/**
+	 * @brief Update the vocal loop of the zombie (idle, wandering, hunting) (not functional atm)
+	 *
+	 * @brief bNewSensedTarget								True when called from OnSeePlayer and OnHearNoise or bSensedTarget is true
+	 *
+	 * @todo Needs pondering over
+	 * @todo To be made functional with single player in mind
+	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "GameExperience")
 	void BroadcastUpdateAudioLoop(bool bNewSensedTarget);
 
-	//void BroadcastUpdateAudioLoop_Implementation(bool bNewSensedTarget);
-
+	/**
+	 * @brief Routine to play the cue sound for zombie's multiple states (idle, hunting, wandering, and attack etc)
+	 *
+	 * @param CueToPlay											The sound to be played
+	 */
 	UAudioComponent* PlayCharacterSound(USoundCue* CueToPlay);
-
-	//void ServerSetSprinting_Implementation(bool NewSprinting);
-
-	//bool ServerSetSprinting_Validate(bool NewSprinting);
 
 	/************************************************************************/
 	/* Targeting                                                            */
 	/************************************************************************/
 
+	/**
+	 * @brief Sets the bIsTargetting, which I have not clue about
+	 *
+	 * @todo Needs removal in the current state of the project
+	 */
 	void SetTargeting(bool NewTargeting);
 
+	/**
+	 * @brief No clue because bIsTargetting's role is not known
+	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "GamePlay")
 	void ServerSetTargeting(bool NewTargeting);
 
+	/**
+	 * @brief The implementation function, which I don't think is necessary
+	 */
 	void ServerSetTargeting_Implementation(bool NewTargeting);
 
-
-	/* Take damage & handle death */
+	/**
+	 * @brief Take damage & handle death
+	 *
+	 * @param DamageAmount							How much damage to apply
+	 * @param DamageEvent							Data package that fully describes the damage received.
+	 * @param EventInstigator						The Controller responsible for the damage.
+	 * @param DamageCauser							The Actor that directly caused the damage (e.g. the projectile that exploded, the rock that landed on zombie)
+	 *
+	 * @return										The amount of damage actually applied.
+	 */
 	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser);
 
+	/**
+	 * @brief Returns true if not already dying, else false
+	 *
+	 * @param KillingDamage							The amount of damage actually applied which led to the kill
+	 * @param DamageEvent							Data package that fully describes the damage received.
+	 * @param Killer								The controller responsible for the kill
+	 * @param DamageCauser							The Actor that directly caused the damage (e.g. the projectile that exploded, the rock that landed on zombie)
+	 *
+	 * @return true or false depending upon condition
+	 * @todo Remove virtual keyword
+	 */
 	virtual bool CanDie(float KillingDamage, FDamageEvent const& DamageEvent, AController* Killer, AActor* DamageCauser) const;
 
+	/**
+	 * @brief Set the health to zero and call ASunovatechZombieKillZoCharacter::OnDeath
+	 *
+	 * @param KillingDamage							The amount of damage actually applied which led to the kill
+	 * @param DamageEvent							Data package that fully describes the damage received.
+	 * @param Killer								The controller responsible for the kill
+	 * @param DamageCauser							The Actor that directly caused the damage (e.g. the projectile that exploded, the rock that landed on zombie)
+	 *
+	 * @return true on successful death, else, false
+	 * @todo Remove virtual keyword
+	 */
 	virtual bool Die(float KillingDamage, FDamageEvent const& DamageEvent, AController* Killer, AActor* DamageCauser);
 
+	/**
+	 * @brief Does the zombie mesh manipulations
+	 *
+	 * The following things are done
+	 * 1. ASunovatechZombieKillZoCharacter::PlayHit is called
+	 * 2. The owning controller is detatched
+	 * 3. ASunovatechZombieKillZoCharacter::SetRagdollPhysics is called
+	 * 4. Based on damage type, impulse is applied
+	 *
+	 * @todo Remove virtual keyword
+	 */
 	virtual void OnDeath(float KillingDamage, FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser);
 
+	/**
+	 * @brief Probably to be called if zombie fell out of world (IDK)
+	 *
+	 * @todo Remove virtual keyword
+	 */
 	virtual void FellOutOfWorld(const class UDamageType& DmgType);
 
+	/**
+	 * @brief Sets up mesh and components for ragdolling zombie
+	 */
 	void SetRagdollPhysics();
 
 	/**
 	 * @brief Routine to play the zombie hit logic concerned with damage
 	 */
 	virtual void PlayHit(float DamageTaken, struct FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser, bool bKilled);
-
-	//void ReplicateHit(float DamageTaken, struct FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser, bool bKilled);
-
 
 public:	
 	// Called every frame
