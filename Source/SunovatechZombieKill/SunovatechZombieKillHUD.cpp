@@ -30,7 +30,8 @@ void ASunovatechZombieKillHUD::DrawHUD()
 	// offset by designer specified value
 	const FVector2D CrosshairDrawPosition((Center.X + OffsetFromCenter.X), (Center.Y + OffsetFromCenter.Y));
 
-	ReticleCoordinates = CrosshairDrawPosition;
+	ReticleCoordinates.X = Center.X;
+	ReticleCoordinates.Y = Center.Y;
 
 	FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex, FLinearColor::White);
 	TileItem.BlendMode = SE_BLEND_Translucent;
