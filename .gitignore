@@ -76,3 +76,5 @@ DerivedDataCache/*
 ArchivedBuilds/
 
 .DS_Store
+
+.vscode/
