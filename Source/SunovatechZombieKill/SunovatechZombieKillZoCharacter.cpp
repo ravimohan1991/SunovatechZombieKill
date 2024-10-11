@@ -99,14 +99,14 @@ void ASunovatechZombieKillZoCharacter::Tick(float DeltaTime)
 	if(bSensedTarget && (GetWorld()->TimeSeconds - LastSeenTime) > SenseTimeOut
 		&& (GetWorld()->TimeSeconds - LastHeardTime) > SenseTimeOut)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Exceeding sensetime out for sight"));
+		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Exceeding sensetime out for sight"));
 
 		ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
 		if(AIController)
 		{
 			bSensedTarget = false;
 
-			UE_LOG(LogTemp, Log, TEXT("Setting blackboard target enemy to null"));
+			UE_LOG(LogSunovatechZombieKill, Log, TEXT("Setting blackboard target enemy to null"));
 
 			/* Reset controller in effect*/
 			AIController->SetTargetEnemy(nullptr);
@@ -129,7 +129,7 @@ void ASunovatechZombieKillZoCharacter::OnSeePlayer(APawn* Pawn)
 		BroadcastUpdateAudioLoop(true);
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Inside OnSeePlayer"));
+	UE_LOG(LogSunovatechZombieKill, Log, TEXT("Inside OnSeePlayer"));
 
 	/* Keep track of the time the player was last sensed in order to clear the target */
 	LastSeenTime = GetWorld()->GetTimeSeconds();
@@ -138,7 +138,7 @@ void ASunovatechZombieKillZoCharacter::OnSeePlayer(APawn* Pawn)
 	ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
 	if(Pawn && /*Pawn->isalive*/ AIController)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Attempting to set the blackboard value to seen pawn"));
+		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Attempting to set the blackboard value to seen pawn"));
 		AIController->SetTargetEnemy(Pawn);
 	}
 }

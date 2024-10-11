@@ -10,6 +10,7 @@
 
 #include "CoreMinimal.h"
 #include "SunovatechZombieKillStProjectile.h"
+#include "SunovatechZombieKillPawn.h"
 #include "AIController.h"
 
 #include "SunovatechZombieKillAIController.generated.h"
