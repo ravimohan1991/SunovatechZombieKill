@@ -86,9 +86,8 @@ void ASunovatechZombieKillPawn::SetupPlayerInputComponent(class UInputComponent*
 	{
 		// shooting
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ASunovatechZombieKillPawn::Fire);
-		//EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &ASunovatechZombieKillPawn::Fire);
 
-		// steering 
+		// steering
 		EnhancedInputComponent->BindAction(SteeringAction, ETriggerEvent::Triggered, this, &ASunovatechZombieKillPawn::Steering);
 		EnhancedInputComponent->BindAction(SteeringAction, ETriggerEvent::Completed, this, &ASunovatechZombieKillPawn::Steering);
 
