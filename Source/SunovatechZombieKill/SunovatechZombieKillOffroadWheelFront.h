@@ -1,4 +1,11 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+/**
+ * @file SunovatechZombieKillOffroadWheelFront.h
+ * @author Ravi Mohan
+ * @brief This file contains USunovatechZombieKillOffroadWheelFront class. The file was generated from UE by Epic Games and modified by author.
+ * @version 1.0
+ * @date September 17, 2024
+ * @copyright Copyright Epic Games, Inc. All Rights Reserved. Ravi Mohan accepted UE(5) license.
+ */
 
 #pragma once
 
@@ -15,5 +22,10 @@ class SUNOVATECHZOMBIEKILL_API USunovatechZombieKillOffroadWheelFront : public U
 	GENERATED_BODY()
 	
 public:
+
+	/**
+	 * @brief Constructor for setting wheel dimension, physics (friction, wheel load ratio ?, suspension, and break torque(s)), and vehicle engine
+	 *
+	 */
 	USunovatechZombieKillOffroadWheelFront();
 };

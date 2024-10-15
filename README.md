@@ -4,9 +4,12 @@
 # SunovatechZombieKill
 A game pitch for a zombie shooter (FPS), based upon the idea by Sunovatech India Pvt. Ltd.
 
-You may use Unreal Engine ver 5.4.4 to build the game on Linux and Windows. Check out the [release section](https://github.com/ravimohan1991/SunovatechZombieKill/releases) for relevant binaries.
+You may use Unreal Engine ver 5.4.4 to build the game on Mac, Linux, and Windows. Check out the [release section](https://github.com/ravimohan1991/SunovatechZombieKill/releases) for relevant binaries.
 
 Youtube: https://youtu.be/ZBuueHGxC88
+
+# Pondering Pond
+[AI BEHAVIOR IN UNREAL ENGINE](https://ravimohan.net/2024/09/26/ai-behavior-in-unreal-engine/)
 
 # Credits
 - [Tom Looman](https://github.com/tomlooman/EpicSurvivalGame)

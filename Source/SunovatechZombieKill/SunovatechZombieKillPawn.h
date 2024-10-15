@@ -19,13 +19,22 @@ class UChaosWheeledVehicleMovementComponent;
 class ASunovatechZombieKillStProjectile;
 struct FInputActionValue;
 
+/**
+ * @brief Declaring our own logging category
+ *
+ * @param CategoryName								category to declare
+ * @param DefaultVerbosity							default run time verbosity
+ * @param CompileTimeVerbosity						maximum verbosity to compile into the code
+ *
+ * @todo Change the name to something more appropriate, use this category in everywhere else, in the project
+ */
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateVehicle, Log, All);
 
 /**
- *  Vehicle Pawn class
+ *  @brief Vehicle Pawn class
  *  Handles common functionality for all vehicle types,
  *  including input handling and camera management.
- *  
+ *
  *  Specific vehicle configurations are handled in subclasses.
  */
 UCLASS(abstract)
@@ -57,6 +66,10 @@ class ASunovatechZombieKillPawn : public AWheeledVehiclePawn
 	TObjectPtr<UChaosWheeledVehicleMovementComponent> ChaosVehicleMovement;
 
 protected:
+
+	/************************************************************************/
+	/* Input                                                               */
+	/************************************************************************/
 
 	/** Shoot action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -117,22 +130,53 @@ protected:
 	FTimerHandle HurtTimerHandle;
 
 public:
+
+	/**
+	 * @brief A constructor
+	 *
+	 * Construction to set up the following:
+	 *
+	 * 1. Camera components on the vehicle (front and back)
+	 * 2. Mesh with simulated physics on
+	 * 3. Chaos vehiclular movement
+	 * 4. Initialization of Health and ZombiesAttacking
+	 */
 	ASunovatechZombieKillPawn();
 
 	/**
-	 * Called when this vechicle pawn begins overlaps different actor
+	 * @brief Called when this vechicle pawn begins overlapping different actor.
 	 *
-	 * Useful to detect the zombie touch (melee) events
+	 * To be bound to the overlap delegate (OnComponentBeginOverlap) declared in PrimitiveComponent.h . Useful to detect the zombie touch (melee) events, when zombie effectively
+	 * (depending on the radius of USphereComponent) starts touching vehicle pawn
+	 *
+	 * @param OverlappedComponent							The overlap component of the pawn vehicle
+	 * @param OtherActor									The actor interacting with pawn vehicle leading to generation of the event beginoverlap
+	 * @param OtherComp										The overlap component (?) of the interacting actor
+	 * @param OtherBodyIndex								Extra data about item that was hit (hit primitive specific).
+	 * @param bFromSweep									If bFromSweep is true then SweepResult (type FHitResult) is completely valid just like
+	 * 														a regular sweep result. If bFromSweep is false only FHitResult::Component,
+	 * 														FHitResult::Actor, FHitResult::Item are valid as this is really just an FOverlapResult
+	 * @param SweepResult									Information for both sweep and overlap queries. Different parts are valid depending on bFromSweep.
+	 * 														Essentially, information about one hit of a trace, such as point of impact and surface normal at that point
+	 * 														(declared in Hitresult.h).
+	 * 	@see OverlapInfo.h, Hitresult.h
 	 *
 	 */
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	/**
-	 * Called when this vechicle pawn ends overlaps different actor
+	 * @brief Called when this vechicle pawn ends overlapping different actor
 	 *
-	 * Useful to detect the zombie touch (melee) events
+	 * To be bound to overlap delegate (OnComponentEndOverlap) declared in PrimitiveComponent.h . Useful to detect when to end zombie melee events, when zombie effectively
+	 * (depending on the radius of USphereComponent) ends touching vehicle pawn
 	 *
+	 * @param OverlappedComponent							The overlap component of the pawn vehicle
+	 * @param OtherActor									The actor interacting with pawn vehicle leading to generation of the event endoverlap
+	 * @param OtherComp										The overlap component (?) of the interacting actor
+	 * @param OtherBodyIndex								Extra data about item that was hit (hit primitive specific).
+	 *
+	 * @see OverlapInfo.h
 	 */
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
@@ -140,12 +184,28 @@ public:
 
 	// Begin Pawn interface
 
+	/**
+	 * @brief Allows a Pawn to set up custom input bindings. Called upon possession by a PlayerController, using the InputComponent created by CreatePlayerInputComponent().
+	 *
+	 * @param UInputComponent								The transient component that enables an Actor to bind various forms of input events to delegate functions.
+	 *
+	 * @note We are using UE5's new Enhanced Input (https://dev.epicgames.com/documentation/en-us/unreal-engine/enhanced-input-in-unreal-engine)
+	 * @see ASunovatechZombieKillPlayerController::SetupInputComponent()
+	 */
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 	// End Pawn interface
 
 	// Begin Actor interface
 
+	/**
+	 * @brief Function called every frame on this Actor. For custom logic, Epic does some angular damping activity.
+	 *
+	 * @param Delta							Game time elapsed during last frame, modified by the time dilation
+	 *
+	 * @note Seems like PrimaryActorTick.bCanEverTick = true is no longer needed in 5.4 (against what is documented in AActor class)? Also,
+	 * for our purposes, we can do without angular damping?
+	 */
 	virtual void Tick(float Delta) override;
 
 	// End Actor interface
@@ -155,24 +215,36 @@ public:
 	/* Probabbly could make a native health component                       */
 	/************************************************************************/
 
+	/**
+	 * @brief Getter for this pawn's initialized health
+	 *
+	 * @return Health
+	 *
+	 * @note For some reason, seems like setting Health in constructor and blueprint is not enough.
+	 * Had to set the value in pawn's BeginPlay() routine.
+	 *
+	 * @see ASunovatechZombieKillPawn::BeginPlay()
+	 */
 	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
 	float GetMaxHealth() const;
 
+	/**
+	 * @brief Gets the current health of this pawn
+	 *
+	 * @return Health
+	 *
+	 * @note Can be called from blueprints
+	 */
 	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
 	float GetHealth() const;
 
+	/**
+	 * @brief Function for querying about the player's state of being, in the game. Dead or alive.
+	 *
+	 * @return True if Health > 0, else, False
+	 */
 	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
 	bool IsAlive() const;
-
-	/**
-	 * @brief A very experimental routine with the assumption that damage inflictor are zombies only.
-	 * Typically you would want APawn::TakeDamage or something like that. This routine will be used
-	 * for zombie's melee attack
-	 * 
-	 * @note Different from usual practice
-	 */
-	/*UFUNCTION(BlueprintCallable, Category = "PlayerCondition")*/
-	//float PlayerHurt(/*float DamageAmount = 1.0f*/);
 
 protected:
 
@@ -213,31 +285,68 @@ protected:
 	 */
 	void Fire();
 
-	// Called when the game starts or when spawned
+	/**
+	 * @brief A native event for when play begins for this actor
+	 *
+	 * @note Using this for setting Health.
+	 * @see ASunovatechZombieKillPawn::GetMaxHealth()
+	 */
 	virtual void BeginPlay() override;
 	
 	/**
 	 * @brief Handles Endgame things to be done which we will do in blueprints
-	 * 
-	 * @note Typically this type of routine belongs to Gamemode
+	 *
+	 * @note Typically this type of routine belongs to Gamemode. Also seems like not working in blueprint
+	 * @todo Fix the blueprint functionality
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Gameplay")
 	void EndGame();
 
 public:
-	/** Gun muzzle's offset from the characters location */
+
+	/**
+	 * @brief Gun muzzle's offset from the pawn location. Typically slightly above the roof of the vehicle
+	 *
+	 * @todo Myabe EditDefaultsOnly should be specified instead?
+	 * @note In my training, I was advised against such public declaration. UE does simillar declarations in some cases though. Needs thinking.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	FVector MuzzleOffset;
 
 public:
-	/** Returns the front spring arm subobject */
+
+	/**
+	 * @brief Returns the front spring arm subobject
+	 *
+	 * @return FrontSpringArm
+	 */
 	FORCEINLINE USpringArmComponent* GetFrontSpringArm() const { return FrontSpringArm; }
-	/** Returns the front camera subobject */
+
+	/**
+	 * @brief Returns the front camera subobject
+	 *
+	 * @return FrontCamera
+	 */
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FrontCamera; }
-	/** Returns the back spring arm subobject */
+
+	/**
+	 * @brief Returns the back spring arm subobject
+	 *
+	 * @return BackSpringArm
+	 */
 	FORCEINLINE USpringArmComponent* GetBackSpringArm() const { return BackSpringArm; }
-	/** Returns the back camera subobject */
+
+	/**
+	 * @brief Returns the back camera subobject
+	 *
+	 * @return BackCamera
+	 */
 	FORCEINLINE UCameraComponent* GetBackCamera() const { return BackCamera; }
-	/** Returns the cast Chaos Vehicle Movement subobject */
+
+	/**
+	 * @brief Returns the cast Chaos Vehicle Movement subobject
+	 *
+	 * @return ChaosVehicleMovement
+	 */
 	FORCEINLINE const TObjectPtr<UChaosWheeledVehicleMovementComponent>& GetChaosVehicleMovement() const { return ChaosVehicleMovement; }
 };
