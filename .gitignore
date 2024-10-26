@@ -78,3 +78,11 @@ ArchivedBuilds/
 .DS_Store
 
 .vscode/
+
+.ignore
+
+Config/DefaultEditor.ini
+
+Makefile
+
+SunovatechZombieKill.code-workspace

@@ -25,10 +25,8 @@ struct FInputActionValue;
  * @param CategoryName								category to declare
  * @param DefaultVerbosity							default run time verbosity
  * @param CompileTimeVerbosity						maximum verbosity to compile into the code
- *
- * @todo Change the name to something more appropriate, use this category in everywhere else, in the project
  */
-DECLARE_LOG_CATEGORY_EXTERN(LogTemplateVehicle, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogSunovatechZombieKill, Log, All);
 
 /**
  *  @brief Vehicle Pawn class

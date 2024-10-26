@@ -10,6 +10,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SunovatechZombieKillPawn.h"
 #include "GameFramework/Character.h"
 #include "SunovatechZombieKillStProjectile.h"
 

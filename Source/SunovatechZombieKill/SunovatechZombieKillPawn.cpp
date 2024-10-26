@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SunovatechZombieKillPawn.h"
-#include "SunovatechZombieKillWheelFront.h"
-#include "SunovatechZombieKillWheelRear.h"
+#include "SunovatechZombieKill/Vehicles/SunovatechZombieKillWheelFront.h"
+#include "SunovatechZombieKill/Vehicles/SunovatechZombieKillWheelRear.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -21,7 +21,7 @@
 
 #define LOCTEXT_NAMESPACE "VehiclePawn"
 
-DEFINE_LOG_CATEGORY(LogTemplateVehicle);
+DEFINE_LOG_CATEGORY(LogSunovatechZombieKill);
 
 ASunovatechZombieKillPawn::ASunovatechZombieKillPawn()
 {
@@ -75,7 +75,7 @@ void ASunovatechZombieKillPawn::BeginPlay()
 	Super::BeginPlay();
 
 	Health = 100;
-	UE_LOG(LogTemp, Log, TEXT("Setting initial Health to %f"), Health);
+	UE_LOG(LogSunovatechZombieKill, Log, TEXT("Setting initial Health to %f"), Health);
 }
 
 void ASunovatechZombieKillPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -86,9 +86,8 @@ void ASunovatechZombieKillPawn::SetupPlayerInputComponent(class UInputComponent*
 	{
 		// shooting
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ASunovatechZombieKillPawn::Fire);
-		//EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &ASunovatechZombieKillPawn::Fire);
 
-		// steering 
+		// steering
 		EnhancedInputComponent->BindAction(SteeringAction, ETriggerEvent::Triggered, this, &ASunovatechZombieKillPawn::Steering);
 		EnhancedInputComponent->BindAction(SteeringAction, ETriggerEvent::Completed, this, &ASunovatechZombieKillPawn::Steering);
 
@@ -116,7 +115,7 @@ void ASunovatechZombieKillPawn::SetupPlayerInputComponent(class UInputComponent*
 	}
 	else
 	{
-		UE_LOG(LogTemplateVehicle, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		UE_LOG(LogSunovatechZombieKill, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
 
@@ -190,12 +189,12 @@ void ASunovatechZombieKillPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedCo
 	if(ZombiePawn)
 	{
 		// Goccha
-		UE_LOG(LogTemp, Log, TEXT("Zombie is overlapping pawn vehicle"));
+		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Zombie is overlapping pawn vehicle"));
 
 		ZombiesAttacking += 1;
 		float IndividualZombieDamage = ZombiePawn->GetMeleeDamage();
 
-		UE_LOG(LogTemp, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
+		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
 
 		if (!GetWorld()->GetTimerManager().IsTimerActive(HurtTimerHandle))
 		{
@@ -210,7 +209,7 @@ void ASunovatechZombieKillPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedCo
 					if (IndividualZombieDamage > 0.f)
 					{
 						Health -= IndividualZombieDamage * ZombiesAttacking;
-						UE_LOG(LogTemp, Log, TEXT("Hurting by the amount %f"), IndividualZombieDamage * ZombiesAttacking);
+						UE_LOG(LogSunovatechZombieKill, Log, TEXT("Hurting by the amount %f"), IndividualZombieDamage * ZombiesAttacking);
 
 						if (Health <= 0)
 						{
@@ -247,10 +246,10 @@ void ASunovatechZombieKillPawn::OnOverlapEnd(UPrimitiveComponent* OverlappedComp
 {
 	if(OtherActor && Cast<ASunovatechZombieKillZoCharacter>(OtherActor))
 	{
-		UE_LOG(LogTemp, Log, TEXT("Zombie has stopped overlapping pawn vehicle"));
+		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Zombie has stopped overlapping pawn vehicle"));
 
 		ZombiesAttacking -= 1;
-		UE_LOG(LogTemp, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
+		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
 
 		if(ZombiesAttacking <= 0)
 		{
@@ -365,7 +364,7 @@ void ASunovatechZombieKillPawn::ResetVehicle(const FInputActionValue& Value)
 	GetMesh()->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
 	GetMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
 
-	UE_LOG(LogTemplateVehicle, Error, TEXT("Reset Vehicle"));
+	UE_LOG(LogSunovatechZombieKill, Error, TEXT("Reset Vehicle"));
 }
 
 void ASunovatechZombieKillPawn::EndGame_Implementation()
