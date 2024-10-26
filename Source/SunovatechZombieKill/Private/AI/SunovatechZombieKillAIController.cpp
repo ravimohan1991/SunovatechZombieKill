@@ -1,5 +1,5 @@
-#include "SunovatechZombieKillAIController.h"
-#include "SunovatechZombieKill/SunovatechZombieKillZoCharacter.h"
+#include "AI/SunovatechZombieKillAIController.h"
+#include "SunovatechZombieKillZoCharacter.h"
 /* AI Specific includes */
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"

@@ -6,7 +6,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Engine.h"
 #include "Kismet/GameplayStatics.h"
-#include "SunovatechZombieKill/SunovatechZombieKillPawn.h"
+#include "SunovatechZombieKill/Public/SunovatechZombieKillPawn.h"
 
 ASunovatechZombieKillHUD::ASunovatechZombieKillHUD()
 {

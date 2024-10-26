@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "SunovatechZombieKillWheelFront.h"
+#include "Vehicles/SunovatechZombieKillWheelFront.h"
 #include "UObject/ConstructorHelpers.h"
 
 USunovatechZombieKillWheelFront::USunovatechZombieKillWheelFront()

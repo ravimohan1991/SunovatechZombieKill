@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SunovatechZombieKillPawn.h"
-#include "SunovatechZombieKill/Vehicles/SunovatechZombieKillWheelFront.h"
-#include "SunovatechZombieKill/Vehicles/SunovatechZombieKillWheelRear.h"
+#include "Vehicles/SunovatechZombieKillWheelFront.h"
+#include "Vehicles/SunovatechZombieKillWheelRear.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -10,12 +10,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
-#include "SunovatechZombieKill/SunovatechZombieKillStProjectile.h"
-#include "SunovatechZombieKill/SunovatechZombieKillHUD.h"
+#include "SunovatechZombieKillStProjectile.h"
+#include "SunovatechZombieKillHUD.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
 #include "SunovatechZombieKillZoCharacter.h"
-#include "SunovatechZombieKill/SunovatechZombieKillPlayerController.h"
+#include "SunovatechZombieKillPlayerController.h"
 #include "Runtime/Engine/Classes/Camera/CameraActor.h"
 #include "EngineUtils.h"
 

@@ -1,9 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 
-#include "SunovatechZombieKillSportsCar.h"
-#include "SunovatechZombieKillSportsWheelFront.h"
-#include "SunovatechZombieKillSportsWheelRear.h"
+#include "Vehicles/SunovatechZombieKillSportsCar.h"
+#include "Vehicles/SunovatechZombieKillSportsWheelFront.h"
+#include "Vehicles/SunovatechZombieKillSportsWheelRear.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
 
 ASunovatechZombieKillSportsCar::ASunovatechZombieKillSportsCar()
