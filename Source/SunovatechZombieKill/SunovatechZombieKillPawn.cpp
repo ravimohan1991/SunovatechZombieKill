@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SunovatechZombieKillPawn.h"
-#include "SunovatechZombieKillWheelFront.h"
-#include "SunovatechZombieKillWheelRear.h"
+#include "SunovatechZombieKill/Vehicles/SunovatechZombieKillWheelFront.h"
+#include "SunovatechZombieKill/Vehicles/SunovatechZombieKillWheelRear.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"

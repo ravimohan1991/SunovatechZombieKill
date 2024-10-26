@@ -9,8 +9,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SunovatechZombieKillStProjectile.h"
-#include "SunovatechZombieKillPawn.h"
+#include "SunovatechZombieKill/SunovatechZombieKillStProjectile.h"
+#include "SunovatechZombieKill/SunovatechZombieKillPawn.h"
 #include "AIController.h"
 
 #include "SunovatechZombieKillAIController.generated.h"

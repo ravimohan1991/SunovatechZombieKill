@@ -14,7 +14,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerState.h"
-#include "SunovatechZombieKillAIController.h"
+#include "SunovatechZombieKill/AI/SunovatechZombieKillAIController.h"
 
 // Sets default values
 ASunovatechZombieKillZoCharacter::ASunovatechZombieKillZoCharacter()

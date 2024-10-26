@@ -10,7 +10,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SunovatechZombieKillPawn.h"
+#include "SunovatechZombieKill/SunovatechZombieKillPawn.h"
 #include "SunovatechZombieKillSportsCar.generated.h"
 
 /**
