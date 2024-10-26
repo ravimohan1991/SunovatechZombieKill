@@ -3,3 +3,22 @@
 SunovatechZombieKill Linux Development Build
 dotnet Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.dll Development Linux -Project=/home/the_cowboy/SunovatechZombieKill/SunovatechZombieKill.uproject -TargetType=Editor -Progress
 
+visual studio code build config
+{
+				"label": "SunovatechZombieKill Linux Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Linux",
+					"Development",
+					"/home/the_cowboy/SunovatechZombieKill/SunovatechZombieKill.uproject",
+					"-TargetType=Editor",
+					"-Progress",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/the_cowboy/UnrealProjects/UnrealEngine"
+				}
+}
