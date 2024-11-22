@@ -14,7 +14,6 @@ ASunovatechZombieKillHUD::ASunovatechZombieKillHUD()
 	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexObj(TEXT("/Game/UI/FirstPersonCrosshair"));
 	CrosshairTex = Cast<UTexture2D>(CrosshairTexObj.Object)->GetResource();
 
-	OffsetFromCenter.X = OffsetFromCenter.Y = 0.0f;
 	HealthDisplayCoordinates.X = HealthDisplayCoordinates.Y = 0.0f;
 }
 
@@ -22,29 +21,31 @@ void ASunovatechZombieKillHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
-	// Draw very simple crosshair
-
-	// find center of the Canvas
-	const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
-
-	// offset by designer specified value
-	const FVector2D CrosshairDrawPosition((Center.X + OffsetFromCenter.X), (Center.Y + OffsetFromCenter.Y));
-
-	ReticleCoordinates.X = Center.X;
-	ReticleCoordinates.Y = Center.Y;
-
-	FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex, FLinearColor::White);
-	TileItem.BlendMode = SE_BLEND_Translucent;
-
-	// draw the reticle
-	Canvas->DrawItem(TileItem);
-
-	// Set the draw color to white
-	Canvas->SetDrawColor(255, 255, 255);
-
 	ASunovatechZombieKillPawn* MyPawn = Cast<ASunovatechZombieKillPawn>(GetOwningPlayerController()->GetPawn());
 	if (MyPawn && TextFont)
 	{
+		// Draw very simple crosshair
+
+		// find center of the Canvas
+		const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+
+		const FVector2D OffsetFromCenter = MyPawn->GetReticleOffsetFromCenter();
+
+		// offset by designer specified value
+		const FVector2D CrosshairDrawPosition((Center.X + OffsetFromCenter.X), (Center.Y + OffsetFromCenter.Y));
+
+		ReticleCoordinates.X = CrosshairDrawPosition.X + CrosshairTex->GetSizeX() / 2.0f;
+		ReticleCoordinates.Y = CrosshairDrawPosition.Y + CrosshairTex->GetSizeY() / 2.0f;
+
+		FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex, FLinearColor::White);
+		TileItem.BlendMode = SE_BLEND_Translucent;
+
+		// draw the reticle
+		Canvas->DrawItem(TileItem);
+
+		// Set the draw color to white
+		Canvas->SetDrawColor(255, 255, 255);
+
 		float XL, YL;
 		float ScaleX, ScaleY;
 

@@ -52,9 +52,6 @@ private:
 	FVector2D ReticleCoordinates;
 
 protected:
-	/** Offset from center of screen for reticle */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
-	FVector2D OffsetFromCenter;
 
 	/** Coordinates for display of Health*/
 	UPROPERTY(EditDefaultsOnly, Category = "Experimental")

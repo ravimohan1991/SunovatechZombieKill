@@ -70,6 +70,8 @@ ASunovatechZombieKillPawn::ASunovatechZombieKillPawn()
 
 	Health = 100;
 	ZombiesAttacking = 0;
+
+	OffsetFromCenter.X = OffsetFromCenter.Y = 0.f;
 }
 
 void ASunovatechZombieKillPawn::BeginPlay()

@@ -308,10 +308,19 @@ public:
 	 * @todo Myabe EditDefaultsOnly should be specified instead?
 	 * @note In my training, I was advised against such public declaration. UE does simillar declarations in some cases though. Needs thinking.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay)
 	FVector MuzzleOffset;
 
+	/** Offset from center of screen for reticle */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Gameplay)
+	FVector2D OffsetFromCenter;
+
 public:
+
+	/** 
+	 * @brief Getter for Reticle offset from center
+	 */
+	FVector2D GetReticleOffsetFromCenter() const { return OffsetFromCenter; }
 
 	/**
 	 * @brief Returns the front spring arm subobject
