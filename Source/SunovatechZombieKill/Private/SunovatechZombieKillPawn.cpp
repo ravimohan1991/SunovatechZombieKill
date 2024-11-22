@@ -66,6 +66,8 @@ ASunovatechZombieKillPawn::ASunovatechZombieKillPawn()
 	OverlapComp->OnComponentBeginOverlap.AddDynamic(this, &ASunovatechZombieKillPawn::OnOverlapBegin);
 	OverlapComp->OnComponentEndOverlap.AddDynamic(this, &ASunovatechZombieKillPawn::OnOverlapEnd);
 
+	//RootComponent = nullptr;
+
 	Health = 100;
 	ZombiesAttacking = 0;
 }
