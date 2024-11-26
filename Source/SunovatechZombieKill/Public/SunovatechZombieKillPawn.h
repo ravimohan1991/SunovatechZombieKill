@@ -60,10 +60,10 @@ class ASunovatechZombieKillPawn : public AWheeledVehiclePawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* BackCamera;
 
+protected:
+
 	/** Cast pointer to the Chaos Vehicle movement component */
 	TObjectPtr<UChaosWheeledVehicleMovementComponent> ChaosVehicleMovement;
-
-protected:
 
 	/************************************************************************/
 	/* Input                                                               */
