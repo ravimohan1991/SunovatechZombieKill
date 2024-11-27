@@ -51,6 +51,12 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "Animation")
 	float GunElavation;
 
+	/**
+	 * @brief The distance (in uu?) till where the firing is to be tracked
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
+	float PlayerInteractionDistance;
+
 public:
 	/**
 	 * @brief Constructor to do the following

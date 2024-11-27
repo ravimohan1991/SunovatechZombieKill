@@ -8,6 +8,7 @@
 #include "ChaosWheeledVehicleMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "SunovatechZombieKillHUD.h"
 #include "SunovatechZombieKillStProjectile.h"
 
@@ -75,12 +76,50 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 
     Forward2D.Normalize();
 
-    float CurrentElavation = GetBackCamera()->GetComponentRotation().Pitch;//FMath::Atan(CameraForwardVector.Z / FMath::Sqrt(CameraForwardVector.X * CameraForwardVector.X + CameraForwardVector.Y * CameraForwardVector.Y)) * 180.f / 3.14f;
+    float CurrentElavation = 0.f;// = GetBackCamera()->GetComponentRotation().Pitch;//FMath::Atan(CameraForwardVector.Z / FMath::Sqrt(CameraForwardVector.X * CameraForwardVector.X + CameraForwardVector.Y * CameraForwardVector.Y)) * 180.f / 3.14f;
     
     //UE_LOG(LogSunovatechZombieKill, Log, TEXT("CurrentElavation: %f, Cached: %f"), CurrentElavation, GunElavation);
     //UE_LOG(LogSunovatechZombieKill, Log, TEXT("Setting initial Health to %f"), Health);
 
-    CurrentElavation = FMath::Clamp(CurrentElavation, 0.f, 60.f);
+    // get the camera transform
+	FVector CameraLoc = GetBackCamera()->GetComponentLocation();
+	FRotator CameraRot = GetBackCamera()->GetComponentRotation();
+
+	FVector Start = CameraLoc;
+    // you need to add a uproperty to the header file for a float PlayerInteractionDistance
+	FVector End = CameraLoc + (CameraRot.Vector() * PlayerInteractionDistance);
+
+    TArray<AActor*> ActorsToIgnore;
+    //ActorsToIgnore.Add(this);
+
+	//  do the line trace
+    FHitResult RV_Hit;
+	bool DidTrace = UKismetSystemLibrary::LineTraceSingle(
+        this, //Worldcontext object
+		Start,		//start
+		End,		//end
+		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody),	//Trace channel
+        true,       //btracecomplex
+        ActorsToIgnore, //Actors to ignore
+        EDrawDebugTrace::None,
+        RV_Hit,
+        true       //ignore self
+		);
+    CurrentElavation = FMath::Clamp(CurrentElavation, -30.f, 60.f);
+
+    if(DidTrace)
+    {
+        UE_LOG(LogSunovatechZombieKill, Log, TEXT("Hitting [%s]"), *RV_Hit.GetActor()->GetName());
+
+        FVector TowardsHitLocation = RV_Hit.ImpactPoint - GetMesh()->GetSocketLocation(FName("gun_jnt"));
+        TowardsHitLocation.Normalize();
+
+        CurrentElavation = FMath::Acos(FVector::DotProduct(TowardsHitLocation, Forward2D)) * 180.f / 3.14f;
+    }
+    else
+    {
+        CurrentElavation = GetBackCamera()->GetComponentRotation().Pitch;
+    }
 
     // Const vectors by definition
     FVector VectorForward;
@@ -140,9 +179,10 @@ void AGoliathTankV::Fire()
 					FVector FireDirection;
 					FVector TempLocation;
 
-					PlayerController->DeprojectScreenPositionToWorld(ReticleCoordinates.X, ReticleCoordinates.Y, TempLocation, FireDirection);
+					FRotator MuzzleRotation = FRotator::ZeroRotator;
+                    MuzzleRotation.Yaw = GunAngle + GetActorRotation().Yaw;
+                    MuzzleRotation.Pitch = GunElavation;
 
-					const FRotator MuzzleRotation = FireDirection.Rotation(); //PlayerController->PlayerCameraManager->GetCameraRotation();
 					const FVector MuzzleLocation = TankGunMuzzleLocation->GetComponentLocation();
 
 					//Set Spawn Collision Handling Override
