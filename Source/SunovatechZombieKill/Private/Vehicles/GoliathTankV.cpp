@@ -8,6 +8,8 @@
 #include "ChaosWheeledVehicleMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "SunovatechZombieKillHUD.h"
+#include "SunovatechZombieKillStProjectile.h"
 
 AGoliathTankV::AGoliathTankV() : Super()
 {
@@ -15,6 +17,7 @@ AGoliathTankV::AGoliathTankV() : Super()
     TankGunMuzzleLocation->SetupAttachment(GetMesh());
 
     GunAngle = 0.f;
+    GunElavation = 0.f;
 }
 
 void AGoliathTankV::BeginPlay()
@@ -32,13 +35,13 @@ void AGoliathTankV::BeginPlay()
 
 void AGoliathTankV::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
+    {
         // steering
-		EnhancedInputComponent->BindAction(SteeringAction, ETriggerEvent::Triggered, this, &AGoliathTankV::SteeringTrigger);
-		EnhancedInputComponent->BindAction(SteeringAction, ETriggerEvent::Completed, this, &AGoliathTankV::SteeringComplete);
+	    EnhancedInputComponent->BindAction(SteeringAction, ETriggerEvent::Triggered, this, &AGoliathTankV::SteeringTrigger);
+	    EnhancedInputComponent->BindAction(SteeringAction, ETriggerEvent::Completed, this, &AGoliathTankV::SteeringComplete);
     }
 }
 
@@ -62,7 +65,7 @@ void AGoliathTankV::Tick(float Delta)
     Super::Tick(Delta);
 }
 
-float AGoliathTankV::GetTurretAngle(float InterpolateSpeed)
+FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 {
     FVector CameraForwardVector = GetBackCamera()->GetForwardVector();
     FVector Forward2D;
@@ -70,12 +73,16 @@ float AGoliathTankV::GetTurretAngle(float InterpolateSpeed)
     Forward2D.Y = CameraForwardVector.Y;
     Forward2D.Z = 0.f;
 
-    //UE_LOG(LogSunovatechZombieKill, Log, TEXT("%f, %f, %f"), Forward2D.X, Forward2D.Y, Forward2D.Z);
-
     Forward2D.Normalize();
 
-   // UE_LOG(LogSunovatechZombieKill, Log, TEXT("%f, %f, %f"), Forward2D.X, Forward2D.Y, Forward2D.Z);
+    float CurrentElavation = FMath::Atan(CameraForwardVector.Z / FMath::Sqrt(CameraForwardVector.X * CameraForwardVector.X + CameraForwardVector.Y * CameraForwardVector.Y)) * 180.f / 3.14f;
+    
+    //UE_LOG(LogSunovatechZombieKill, Log, TEXT("CurrentElavation: %f, Cached: %f"), CurrentElavation, GunElavation);
+    //UE_LOG(LogSunovatechZombieKill, Log, TEXT("Setting initial Health to %f"), Health);
 
+    CurrentElavation = FMath::Clamp(CurrentElavation, 0.f, 60.f);
+
+    // Const vectors by definition
     FVector VectorForward;
     VectorForward.X = 1.f;
     VectorForward.Y = 0.f;
@@ -88,7 +95,6 @@ float AGoliathTankV::GetTurretAngle(float InterpolateSpeed)
 
     float AngleWithForward = FMath::Acos(FVector::DotProduct(VectorForward, Forward2D)) * 180.f / 3.14f;
 
-    //UE_LOG(LogSunovatechZombieKill, Log, TEXT("Angle: %f"), AngleWithForward);
     if(FVector::DotProduct(VectorRight, Forward2D) <= 0.f)
     {
         AngleWithForward = 360.0f - AngleWithForward;
@@ -99,12 +105,55 @@ float AGoliathTankV::GetTurretAngle(float InterpolateSpeed)
     FRotator FromRotation = FRotator::ZeroRotator;
     FRotator ToRotation = FRotator::ZeroRotator;
 
+    FromRotation.Pitch = GunElavation;
+    ToRotation.Pitch = CurrentElavation;
+
     FromRotation.Yaw = GunAngle;
     ToRotation.Yaw = CurrentAngleDiff;
 
-    //UE_LOG(LogSunovatechZombieKill, Log, TEXT("%f, %f, %f"), GetActorRotation().Pitch, GetActorRotation().Yaw, GetActorRotation().Roll);
-
     static float WorldDeltaSeconds = UGameplayStatics::GetWorldDeltaSeconds(this);
 
-    return FMath::RInterpTo(FromRotation, ToRotation, WorldDeltaSeconds, InterpolateSpeed).Yaw;
+    return FMath::RInterpTo(FromRotation, ToRotation, WorldDeltaSeconds, InterpolateSpeed);
+}
+
+void AGoliathTankV::Fire()
+{
+    if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	}
+
+    if (ProjectileClass)
+	{
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+			if(PlayerController && PlayerController->GetHUD())
+			{
+				ASunovatechZombieKillHUD* NativeHUD = Cast<ASunovatechZombieKillHUD>(PlayerController->GetHUD());
+
+				if(NativeHUD)
+				{
+					FVector2D ReticleCoordinates = NativeHUD->GetReticleCoordinates();
+					FVector FireDirection;
+					FVector TempLocation;
+
+					PlayerController->DeprojectScreenPositionToWorld(ReticleCoordinates.X, ReticleCoordinates.Y, TempLocation, FireDirection);
+
+					const FRotator MuzzleRotation = FireDirection.Rotation(); //PlayerController->PlayerCameraManager->GetCameraRotation();
+					const FVector MuzzleLocation = TankGunMuzzleLocation->GetComponentLocation();
+
+					//Set Spawn Collision Handling Override
+					FActorSpawnParameters ActorSpawnParams;
+					ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+					ActorSpawnParams.Instigator = this;
+
+					// spawn the projectile at the muzzle
+					World->SpawnActor<ASunovatechZombieKillStProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
+				}
+			}
+		}
+	}
 }

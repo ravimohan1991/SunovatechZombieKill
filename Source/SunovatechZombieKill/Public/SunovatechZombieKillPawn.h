@@ -281,7 +281,7 @@ protected:
 	 * 
 	 * @note No network play compatible logic
 	 */
-	void Fire();
+	virtual void Fire();
 
 	/**
 	 * @brief A native event for when play begins for this actor

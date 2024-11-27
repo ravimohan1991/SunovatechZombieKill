@@ -40,10 +40,16 @@ protected:
 	class UVehicleAnimationInstance* AnimationBP;
 
 	/**
-	 * @brief Caching the angle of tank's gun
+	 * @brief Caching the angle (in the horizontal plane) of tank's gun
 	 */
 	UPROPERTY(BlueprintReadWrite, Category = "Animation")
 	float GunAngle;
+
+	/**
+	 * @brief Caching the elevation (in the vertical plane) of tank's gun
+	 */
+	UPROPERTY(BlueprintReadWrite, Category = "Animation")
+	float GunElavation;
 
 public:
 	/**
@@ -84,10 +90,13 @@ public:
 	/**
 	 * @brief Computes the tank's turret angle
 	 * 
+	 * @param InterpolateSpeed						The speed with which to interpolate orienting of tank's turret 
+	 * 
+	 * @return FRotator, where FRotator.Yaw is GunRotation and FRotator.Pitch is GunElavation
 	 * @todo Think about the category
 	 */
 	UFUNCTION(Blueprintpure, Category = "Animation")
-	float GetTurretAngle(float InterpolateSpeed);
+	FRotator GetTurretOrientation(float InterpolateSpeed);
 
 protected:
 
@@ -95,7 +104,14 @@ protected:
 	void SteeringTrigger(const FInputActionValue& Value);
 
 	/**
-	 * Handles steering complete input
+	 * @brief Handles steering complete input
 	 */
 	void SteeringComplete(const FInputActionValue& Value);
+
+	/** 
+	 * @brief Fires a projectile.
+	 * 
+	 * @note No network play compatible logic
+	 */
+	virtual void Fire() override;
 };
