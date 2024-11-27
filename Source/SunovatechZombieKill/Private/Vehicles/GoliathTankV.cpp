@@ -75,7 +75,7 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 
     Forward2D.Normalize();
 
-    float CurrentElavation = FMath::Atan(CameraForwardVector.Z / FMath::Sqrt(CameraForwardVector.X * CameraForwardVector.X + CameraForwardVector.Y * CameraForwardVector.Y)) * 180.f / 3.14f;
+    float CurrentElavation = GetBackCamera()->GetComponentRotation().Pitch;//FMath::Atan(CameraForwardVector.Z / FMath::Sqrt(CameraForwardVector.X * CameraForwardVector.X + CameraForwardVector.Y * CameraForwardVector.Y)) * 180.f / 3.14f;
     
     //UE_LOG(LogSunovatechZombieKill, Log, TEXT("CurrentElavation: %f, Cached: %f"), CurrentElavation, GunElavation);
     //UE_LOG(LogSunovatechZombieKill, Log, TEXT("Setting initial Health to %f"), Health);
