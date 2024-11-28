@@ -42,13 +42,13 @@ protected:
 	/**
 	 * @brief Caching the angle (in the horizontal plane) of tank's gun
 	 */
-	UPROPERTY(BlueprintReadWrite, Category = "Animation")
+	UPROPERTY(BlueprintReadWrite, Category = "Gameplay")
 	float GunAngle;
 
 	/**
 	 * @brief Caching the elevation (in the vertical plane) of tank's gun
 	 */
-	UPROPERTY(BlueprintReadWrite, Category = "Animation")
+	UPROPERTY(BlueprintReadWrite, Category = "Gameplay")
 	float GunElavation;
 
 	/**

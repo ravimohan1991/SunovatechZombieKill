@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "SunovatechZombieKillPawn.h"
 #include "Vehicles/SunovatechZombieKillWheelFront.h"
 #include "Vehicles/SunovatechZombieKillWheelRear.h"

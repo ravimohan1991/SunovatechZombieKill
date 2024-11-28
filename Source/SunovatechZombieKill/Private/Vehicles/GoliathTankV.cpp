@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Vehicles/GoliathTankV.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -11,6 +8,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "SunovatechZombieKillHUD.h"
 #include "SunovatechZombieKillStProjectile.h"
+#include "GameFramework/SpringArmComponent.h"
 
 AGoliathTankV::AGoliathTankV() : Super()
 {
@@ -29,6 +27,9 @@ void AGoliathTankV::BeginPlay()
 
     // Attach gun muzzle location
     TankGunMuzzleLocation->AttachToComponent(GetMesh(), AttachRules, FName("gun_jntSocket"));
+
+    // Attach back camera to gun joint
+    GetBackSpringArm()->AttachToComponent(GetMesh(), AttachRules, FName("gun_jnt"));
 
     // Cache the animation bp of tank
     AnimationBP = Cast<UVehicleAnimationInstance>(GetMesh()->GetAnimInstance());
@@ -95,31 +96,45 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 	//  do the line trace
     FHitResult RV_Hit;
 	bool DidTrace = UKismetSystemLibrary::LineTraceSingle(
-        this, //Worldcontext object
-		Start,		//start
-		End,		//end
+        this,                                                                   //Worldcontext object
+		Start,		                                                            //start
+		End,		                                                            //end
 		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody),	//Trace channel
-        true,       //btracecomplex
-        ActorsToIgnore, //Actors to ignore
-        EDrawDebugTrace::None,
-        RV_Hit,
-        true       //ignore self
+        true,                                                                   //btracecomplex
+        ActorsToIgnore,                                                         //Actors to ignore
+        EDrawDebugTrace::None,                                                  //DebugTrace
+        RV_Hit,                                                                 //HitResult
+        true                                                                    //ignore self
 		);
-    CurrentElavation = FMath::Clamp(CurrentElavation, -30.f, 60.f);
 
     if(DidTrace)
     {
-        UE_LOG(LogSunovatechZombieKill, Log, TEXT("Hitting [%s]"), *RV_Hit.GetActor()->GetName());
+        //UE_LOG(LogSunovatechZombieKill, Log, TEXT("Hitting [%s]"), *RV_Hit.GetActor()->GetName());
+        //UE_LOG(LogSunovatechZombieKill, Log, TEXT("Hit Location (%f, %f, %f)"), RV_Hit.ImpactPoint.X, RV_Hit.ImpactPoint.Y, RV_Hit.ImpactPoint.Z);
 
-        FVector TowardsHitLocation = RV_Hit.ImpactPoint - GetMesh()->GetSocketLocation(FName("gun_jnt"));
+        FVector GunSocketLocation = GetMesh()->GetSocketLocation(FName("gun_jnt"));
+        float GunSocketHeight = GunSocketLocation.Z;
+
+        FVector TowardsHitLocation = RV_Hit.ImpactPoint - GunSocketLocation;
         TowardsHitLocation.Normalize();
 
-        CurrentElavation = FMath::Acos(FVector::DotProduct(TowardsHitLocation, Forward2D)) * 180.f / 3.14f;
+        float DotProduct = FVector::DotProduct(TowardsHitLocation, Forward2D);
+
+        CurrentElavation = FMath::Acos(DotProduct) * 180.f / 3.14f;
+
+        //UE_LOG(LogSunovatechZombieKill, Log, TEXT("CurrentElavation: %f"), CurrentElavation);
+
+        if(TowardsHitLocation.Z <= 0.f)
+        {
+            CurrentElavation = -CurrentElavation;
+        }
     }
     else
     {
-        CurrentElavation = GetBackCamera()->GetComponentRotation().Pitch;
+        CurrentElavation = GunElavation;
     }
+
+    CurrentElavation = FMath::Clamp(CurrentElavation, -6.f, 60.f);
 
     // Const vectors by definition
     FVector VectorForward;
