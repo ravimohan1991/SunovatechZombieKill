@@ -28,7 +28,10 @@ void AGoliathTankV::BeginPlay()
     // Attach gun muzzle location
     TankGunMuzzleLocation->AttachToComponent(GetMesh(), AttachRules, FName("gun_jntSocket"));
 
-    // Attach back camera to gun joint
+    // Attach front camera to gun joint. Note: socket offsets are done in blueprints, visually
+    GetFrontSpringArm()->AttachToComponent(GetMesh(), AttachRules, FName("gun_jnt"));
+
+    // Attach back camera to gun joint. Note: socket offsets are done in blueprints, visually
     GetBackSpringArm()->AttachToComponent(GetMesh(), AttachRules, FName("gun_jnt"));
 
     // Cache the animation bp of tank
@@ -69,7 +72,18 @@ void AGoliathTankV::Tick(float Delta)
 
 FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 {
-    FVector CameraForwardVector = GetBackCamera()->GetForwardVector();
+    UCameraComponent* CurrentCamera;
+
+    if(!bFrontCameraActive)
+    {
+        CurrentCamera = GetBackCamera();
+    }
+    else
+    {
+        CurrentCamera = GetFollowCamera();
+    }
+
+    FVector CameraForwardVector = CurrentCamera->GetForwardVector();
     FVector Forward2D;
     Forward2D.X = CameraForwardVector.X;
     Forward2D.Y = CameraForwardVector.Y;
@@ -77,21 +91,16 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 
     Forward2D.Normalize();
 
-    float CurrentElavation = 0.f;// = GetBackCamera()->GetComponentRotation().Pitch;//FMath::Atan(CameraForwardVector.Z / FMath::Sqrt(CameraForwardVector.X * CameraForwardVector.X + CameraForwardVector.Y * CameraForwardVector.Y)) * 180.f / 3.14f;
-    
-    //UE_LOG(LogSunovatechZombieKill, Log, TEXT("CurrentElavation: %f, Cached: %f"), CurrentElavation, GunElavation);
-    //UE_LOG(LogSunovatechZombieKill, Log, TEXT("Setting initial Health to %f"), Health);
+    float CurrentElavation = 0.f;
 
     // get the camera transform
-	FVector CameraLoc = GetBackCamera()->GetComponentLocation();
-	FRotator CameraRot = GetBackCamera()->GetComponentRotation();
+	FVector CameraLoc = CurrentCamera->GetComponentLocation();
+	FRotator CameraRot = CurrentCamera->GetComponentRotation();
 
 	FVector Start = CameraLoc;
-    // you need to add a uproperty to the header file for a float PlayerInteractionDistance
 	FVector End = CameraLoc + (CameraRot.Vector() * PlayerInteractionDistance);
 
     TArray<AActor*> ActorsToIgnore;
-    //ActorsToIgnore.Add(this);
 
 	//  do the line trace
     FHitResult RV_Hit;
@@ -109,9 +118,6 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 
     if(DidTrace)
     {
-        //UE_LOG(LogSunovatechZombieKill, Log, TEXT("Hitting [%s]"), *RV_Hit.GetActor()->GetName());
-        //UE_LOG(LogSunovatechZombieKill, Log, TEXT("Hit Location (%f, %f, %f)"), RV_Hit.ImpactPoint.X, RV_Hit.ImpactPoint.Y, RV_Hit.ImpactPoint.Z);
-
         FVector GunSocketLocation = GetMesh()->GetSocketLocation(FName("gun_jnt"));
         float GunSocketHeight = GunSocketLocation.Z;
 
@@ -120,13 +126,18 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 
         float DotProduct = FVector::DotProduct(TowardsHitLocation, Forward2D);
 
-        CurrentElavation = FMath::Acos(DotProduct) * 180.f / 3.14f;
-
-        //UE_LOG(LogSunovatechZombieKill, Log, TEXT("CurrentElavation: %f"), CurrentElavation);
-
-        if(TowardsHitLocation.Z <= 0.f)
+        if(RV_Hit.GetActor()->IsA(ASunovatechZombieKillStProjectile::StaticClass()))
         {
-            CurrentElavation = -CurrentElavation;
+            CurrentElavation = GunElavation;
+        }
+        else
+        {
+            CurrentElavation = FMath::Acos(DotProduct) * 180.f / 3.14f;
+
+            if(TowardsHitLocation.Z <= 0.f)
+            {
+                CurrentElavation = -CurrentElavation;
+            }
         }
     }
     else
@@ -165,7 +176,7 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
     FromRotation.Yaw = GunAngle;
     ToRotation.Yaw = CurrentAngleDiff;
 
-    static float WorldDeltaSeconds = UGameplayStatics::GetWorldDeltaSeconds(this);
+    static float WorldDeltaSeconds = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
 
     return FMath::RInterpTo(FromRotation, ToRotation, WorldDeltaSeconds, InterpolateSpeed);
 }
