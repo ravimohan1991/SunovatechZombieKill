@@ -101,6 +101,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* ResetVehicleAction;
 
+	/** Zooming action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* AimZoomAction;
+
 	/** Projectile class to spawn on shooting */
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	TSubclassOf<ASunovatechZombieKillStProjectile> ProjectileClass;
@@ -120,6 +124,15 @@ protected:
 	/** Amount of damage to be given cached */
 	//UPROPERTY(BlueprintReadOnly, Category = "Zombie Interaction")
 	//float IndividualZombieDamage;
+
+	/** Caching the original FOV */
+	float OriginalFOV;
+
+	/** Intermediate FOV value during lerping */
+	float LerpingFOV;
+
+	/** Should we zoom? */
+	bool bZoom;
 
 	/** Keeps track of which camera is active */
 	bool bFrontCameraActive = false;
@@ -244,6 +257,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
 	bool IsAlive() const;
 
+	/**
+	 * @brief Gets the current active camera being used for the view purpose
+	 * 
+	 * @return Active camera
+	 */
+	UFUNCTION(BlueprintCAllable, Category = "Accessories")
+	UCameraComponent* GetActiveCamera() const;
+
 protected:
 
 	/** Handles steering input */
@@ -275,6 +296,12 @@ protected:
 	/** Called when the brake lights are turned on or off */
 	UFUNCTION(BlueprintImplementableEvent, Category="Vehicle")
 	void BrakeLights(bool bBraking);
+
+	/** Zooming in of the aim */
+	void ZoomIn(const FInputActionValue& Value);
+
+	/** Zoom out */
+	void ZoomOut(const FInputActionValue& Value);
 
 	/** 
 	 * @brief Fires a projectile.

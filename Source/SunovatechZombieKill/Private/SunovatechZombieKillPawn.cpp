@@ -68,8 +68,21 @@ ASunovatechZombieKillPawn::ASunovatechZombieKillPawn()
 
 	Health = 100;
 	ZombiesAttacking = 0;
-
 	OffsetFromCenter.X = OffsetFromCenter.Y = 0.f;
+	bFrontCameraActive = false;
+	bZoom = true;
+}
+
+UCameraComponent* ASunovatechZombieKillPawn::GetActiveCamera() const
+{
+	if(bFrontCameraActive)
+	{
+		return FrontCamera;
+	}
+	else
+	{
+		return BackCamera;
+	}
 }
 
 void ASunovatechZombieKillPawn::BeginPlay()
@@ -78,6 +91,8 @@ void ASunovatechZombieKillPawn::BeginPlay()
 
 	Health = 100;
 	UE_LOG(LogSunovatechZombieKill, Log, TEXT("Setting initial Health to %f"), Health);
+
+	OriginalFOV = LerpingFOV = BackCamera->FieldOfView;
 }
 
 void ASunovatechZombieKillPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -114,6 +129,10 @@ void ASunovatechZombieKillPawn::SetupPlayerInputComponent(class UInputComponent*
 
 		// reset the vehicle 
 		EnhancedInputComponent->BindAction(ResetVehicleAction, ETriggerEvent::Triggered, this, &ASunovatechZombieKillPawn::ResetVehicle);
+
+		// zoom the aiming
+		EnhancedInputComponent->BindAction(AimZoomAction, ETriggerEvent::Ongoing, this, &ASunovatechZombieKillPawn::ZoomIn);
+		EnhancedInputComponent->BindAction(AimZoomAction, ETriggerEvent::Completed, this, &ASunovatechZombieKillPawn::ZoomOut);
 	}
 	else
 	{
@@ -128,6 +147,49 @@ void ASunovatechZombieKillPawn::Tick(float Delta)
 	// add some angular damping if the vehicle is in midair
 	bool bMovingOnGround = ChaosVehicleMovement->IsMovingOnGround();
 	GetMesh()->SetAngularDamping(bMovingOnGround ? 0.0f : 3.0f);
+}
+
+void ASunovatechZombieKillPawn::ZoomIn(const FInputActionValue& Value)
+{
+	if(!bZoom)
+	{
+		return;
+	}
+
+	LerpingFOV = FMath::FInterpTo(LerpingFOV, 1.f / 9.f * OriginalFOV, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 1.2f);
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if(PC)
+	{
+		APlayerCameraManager* PCM = PC->PlayerCameraManager;
+		if(PCM)
+		{
+			PCM->SetFOV(LerpingFOV);
+		}
+	}
+}
+
+void ASunovatechZombieKillPawn::ZoomOut(const FInputActionValue& Value)
+{
+	if(bZoom)
+	{
+		bZoom = false;
+	}
+	else
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if(PC)
+		{
+			APlayerCameraManager* PCM = PC->PlayerCameraManager;
+			if(PCM)
+			{
+				PCM->SetFOV(OriginalFOV);
+				LerpingFOV = OriginalFOV;
+
+				bZoom = true;
+			}
+		}
+	}
 }
 
 void ASunovatechZombieKillPawn::Fire()

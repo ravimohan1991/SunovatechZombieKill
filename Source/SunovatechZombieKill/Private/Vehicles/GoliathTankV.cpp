@@ -68,12 +68,18 @@ void AGoliathTankV::SteeringComplete(const FInputActionValue& Value)
 void AGoliathTankV::Tick(float Delta)
 {
     Super::Tick(Delta);
+
+    FRotator TurretOrientation = GetTurretOrientation(0.8f);
+
+    GunAngle = TurretOrientation.Yaw;
+    GunElavation = TurretOrientation.Pitch;
 }
 
 FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 {
-    UCameraComponent* CurrentCamera;
+    UCameraComponent* CurrentCamera = GetActiveCamera();
 
+    /*
     if(!bFrontCameraActive)
     {
         CurrentCamera = GetBackCamera();
@@ -82,6 +88,7 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
     {
         CurrentCamera = GetFollowCamera();
     }
+    */
 
     FVector CameraForwardVector = CurrentCamera->GetForwardVector();
     FVector Forward2D;
@@ -176,7 +183,7 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
     FromRotation.Yaw = GunAngle;
     ToRotation.Yaw = CurrentAngleDiff;
 
-    static float WorldDeltaSeconds = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
+    const float WorldDeltaSeconds = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
 
     return FMath::RInterpTo(FromRotation, ToRotation, WorldDeltaSeconds, InterpolateSpeed);
 }

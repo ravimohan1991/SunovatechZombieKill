@@ -94,14 +94,19 @@ public:
 	virtual void Tick(float Delta) override;
 
 	/**
-	 * @brief Computes the tank's turret angle
+	 * @brief Computes the tank's turret angle and elavation.
+	 * 
+	 * Basically a raycast is done each tick to identify the location where player is currently aiming at. Combining that with
+	 * controller's yaw, both angle and elavation are computed.
 	 * 
 	 * @param InterpolateSpeed						The speed with which to interpolate orienting of tank's turret 
 	 * 
 	 * @return FRotator, where FRotator.Yaw is GunRotation and FRotator.Pitch is GunElavation
+	 * @note 
+	 * 
 	 * @todo Think about the category
 	 */
-	UFUNCTION(Blueprintpure, Category = "Animation")
+	//UFUNCTION(Blueprintpure, Category = "Animation")
 	FRotator GetTurretOrientation(float InterpolateSpeed);
 
 protected:
