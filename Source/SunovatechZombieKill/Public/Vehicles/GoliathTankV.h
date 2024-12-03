@@ -20,6 +20,20 @@ class SUNOVATECHZOMBIEKILL_API AGoliathTankV : public ASunovatechZombieKillPawn
 {
 	GENERATED_BODY()
 
+	/** 
+	 * @brief Hit result from raycast
+	 * 
+	 * @see AGoliathTankV::GetTurretOrientation
+	 */
+	FHitResult RV_Hit;
+
+	/**
+	 * @brief Was raycast successful
+	 * 
+	 * @see AGoliathTankV::GetTurretOrientation
+	 */
+	bool DidTrace;
+
 protected:
 
 	/**
@@ -52,10 +66,16 @@ protected:
 	float GunElavation;
 
 	/**
-	 * @brief The distance (in uu?) till where the firing is to be tracked
+	 * @brief The distance (in uu?) till where the tank's firing is to be tracked
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	float PlayerInteractionDistance;
+
+	/**
+	 * @brief The distance between turret's impact point and camera's view impact point
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Reticle")
+	float DoableTargetHitDistance;
 
 public:
 	/**
@@ -106,8 +126,12 @@ public:
 	 * 
 	 * @todo Think about the category
 	 */
-	//UFUNCTION(Blueprintpure, Category = "Animation")
 	FRotator GetTurretOrientation(float InterpolateSpeed);
+
+	/**
+	 * @brief See if turret is pointing towards aimed target
+	 */
+	bool IsTurretPointingTarget();
 
 protected:
 

@@ -41,7 +41,7 @@ public:
 	 * Getter for reticle coordinates
 	 */
 	UFUNCTION(BlueprintCallable, Category="HUD")
-	 FVector2D& GetReticleCoordinates() { return ReticleCoordinates; }
+	FVector2D& GetReticleCoordinates() { return ReticleCoordinates; }
 
 private:
 	/** 

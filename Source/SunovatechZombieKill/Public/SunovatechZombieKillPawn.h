@@ -17,6 +17,7 @@ class USpringArmComponent;
 class UInputAction;
 class UChaosWheeledVehicleMovementComponent;
 class ASunovatechZombieKillStProjectile;
+class UTexture2D;
 struct FInputActionValue;
 
 /**
@@ -121,9 +122,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Zombie Interaction")
 	int32 ZombiesAttacking;
 
-	/** Amount of damage to be given cached */
-	//UPROPERTY(BlueprintReadOnly, Category = "Zombie Interaction")
-	//float IndividualZombieDamage;
+	/** Offset from center of screen for reticle */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Reticle")
+	FVector2D OffsetFromCenter;
+
+	/** The reticle to be drawn */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Reticle")
+	UTexture2D* CurrentReticle;
+
+	/** The color of the reticle to be drawn */
+	UPROPERTY(EditDefaultsOnly, Category = "Reticle")
+	FColor ReticleColor;
 
 	/** Caching the original FOV */
 	float OriginalFOV;
@@ -262,8 +271,20 @@ public:
 	 * 
 	 * @return Active camera
 	 */
-	UFUNCTION(BlueprintCAllable, Category = "Accessories")
+	UFUNCTION(BlueprintCallable, Category = "Accessories")
 	UCameraComponent* GetActiveCamera() const;
+
+	/**
+	 * @brief Getter for the reticle to be drawn on HUD
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Reticle")
+	UTexture2D* GetCurrentReticle() const { return CurrentReticle; }
+
+	/**
+	 * @brief Getter for reticle color
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Reticle")
+	const FColor& GetReticleColor() const { return ReticleColor; }
 
 protected:
 
@@ -337,10 +358,6 @@ public:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay)
 	FVector MuzzleOffset;
-
-	/** Offset from center of screen for reticle */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Gameplay)
-	FVector2D OffsetFromCenter;
 
 public:
 

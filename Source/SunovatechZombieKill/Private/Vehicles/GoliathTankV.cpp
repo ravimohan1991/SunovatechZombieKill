@@ -73,22 +73,65 @@ void AGoliathTankV::Tick(float Delta)
 
     GunAngle = TurretOrientation.Yaw;
     GunElavation = TurretOrientation.Pitch;
+
+    if(IsTurretPointingTarget())
+    {
+        ReticleColor = FColor::Green;
+    }
+    else
+    {
+        ReticleColor = FColor::Red;
+    }
+}
+
+bool AGoliathTankV::IsTurretPointingTarget()
+{
+    if(RV_Hit.GetActor())
+    {
+        TArray<AActor*> ActorsToIgnore;
+        FHitResult RV_LineHit;
+
+        UGameplayStatics::GetAllActorsOfClass(this, ASunovatechZombieKillStProjectile::StaticClass(), ActorsToIgnore);
+
+        FRotator TurretRotation = FRotator::ZeroRotator;
+        TurretRotation.Yaw = GunAngle + GetActorRotation().Yaw;
+        TurretRotation.Pitch = GunElavation;
+
+        FVector Start = TankGunMuzzleLocation->GetComponentLocation();
+	    FVector End = Start + (TurretRotation.Vector() * PlayerInteractionDistance);
+
+        bool bTrace = UKismetSystemLibrary::LineTraceSingle(
+            this,
+            Start,
+            End,
+            UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_PhysicsBody),
+            true,
+            ActorsToIgnore,
+            EDrawDebugTrace::None,                                                  
+            RV_LineHit,                                                                 
+            true                                                                 
+        );
+
+        FVector Diff = RV_Hit.ImpactPoint - RV_LineHit.ImpactPoint;
+
+        if(bTrace && Diff.Size() <= DoableTargetHitDistance)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
 }
 
 FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 {
     UCameraComponent* CurrentCamera = GetActiveCamera();
-
-    /*
-    if(!bFrontCameraActive)
-    {
-        CurrentCamera = GetBackCamera();
-    }
-    else
-    {
-        CurrentCamera = GetFollowCamera();
-    }
-    */
 
     FVector CameraForwardVector = CurrentCamera->GetForwardVector();
     FVector Forward2D;
@@ -108,10 +151,11 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 	FVector End = CameraLoc + (CameraRot.Vector() * PlayerInteractionDistance);
 
     TArray<AActor*> ActorsToIgnore;
+    UGameplayStatics::GetAllActorsOfClass(this, ASunovatechZombieKillStProjectile::StaticClass(), ActorsToIgnore);
 
 	//  do the line trace
-    FHitResult RV_Hit;
-	bool DidTrace = UKismetSystemLibrary::LineTraceSingle(
+    // FHitResult RV_Hit;
+	DidTrace = UKismetSystemLibrary::LineTraceSingle(
         this,                                                                   //Worldcontext object
 		Start,		                                                            //start
 		End,		                                                            //end
@@ -133,23 +177,17 @@ FRotator AGoliathTankV::GetTurretOrientation(float InterpolateSpeed)
 
         float DotProduct = FVector::DotProduct(TowardsHitLocation, Forward2D);
 
-        if(RV_Hit.GetActor()->IsA(ASunovatechZombieKillStProjectile::StaticClass()))
-        {
-            CurrentElavation = GunElavation;
-        }
-        else
-        {
-            CurrentElavation = FMath::Acos(DotProduct) * 180.f / 3.14f;
+        CurrentElavation = FMath::Acos(DotProduct) * 180.f / 3.14f;
 
-            if(TowardsHitLocation.Z <= 0.f)
-            {
-                CurrentElavation = -CurrentElavation;
-            }
+        if(TowardsHitLocation.Z <= 0.f)
+        {
+            CurrentElavation = -CurrentElavation;
         }
     }
     else
     {
         CurrentElavation = GunElavation;
+        RV_Hit = FHitResult();
     }
 
     CurrentElavation = FMath::Clamp(CurrentElavation, -6.f, 60.f);
