@@ -259,6 +259,7 @@ void ASunovatechZombieKillPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedCo
 		float IndividualZombieDamage = ZombiePawn->GetMeleeDamage();
 
 		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
+		ZombiePawn->SetAttack(true);
 
 		if (!GetWorld()->GetTimerManager().IsTimerActive(HurtTimerHandle))
 		{
@@ -310,10 +311,14 @@ void ASunovatechZombieKillPawn::OnOverlapEnd(UPrimitiveComponent* OverlappedComp
 {
 	if(OtherActor && Cast<ASunovatechZombieKillZoCharacter>(OtherActor))
 	{
-		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Zombie has stopped overlapping pawn vehicle"));
+		ASunovatechZombieKillZoCharacter* ZombiePawn = Cast<ASunovatechZombieKillZoCharacter>(OtherActor);
+
+		if(ZombiePawn)
+		{
+			ZombiePawn->SetAttack(false);
+		}
 
 		ZombiesAttacking -= 1;
-		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
 
 		if(ZombiesAttacking <= 0)
 		{
