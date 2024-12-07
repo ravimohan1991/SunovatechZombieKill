@@ -10,11 +10,7 @@
 
 ASunovatechZombieKillHUD::ASunovatechZombieKillHUD()
 {
-	// Set the crosshair texture
-	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexObj(TEXT("/Game/UI/FirstPersonCrosshair"));
-	CrosshairTex = Cast<UTexture2D>(CrosshairTexObj.Object)->GetResource();
-
-	OffsetFromCenter.X = OffsetFromCenter.Y = 0.0f;
+	CrosshairTex = nullptr;
 	HealthDisplayCoordinates.X = HealthDisplayCoordinates.Y = 0.0f;
 }
 
@@ -22,29 +18,41 @@ void ASunovatechZombieKillHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
-	// Draw very simple crosshair
-
-	// find center of the Canvas
-	const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
-
-	// offset by designer specified value
-	const FVector2D CrosshairDrawPosition((Center.X + OffsetFromCenter.X), (Center.Y + OffsetFromCenter.Y));
-
-	ReticleCoordinates.X = Center.X;
-	ReticleCoordinates.Y = Center.Y;
-
-	FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex, FLinearColor::White);
-	TileItem.BlendMode = SE_BLEND_Translucent;
-
-	// draw the reticle
-	Canvas->DrawItem(TileItem);
-
-	// Set the draw color to white
-	Canvas->SetDrawColor(255, 255, 255);
-
 	ASunovatechZombieKillPawn* MyPawn = Cast<ASunovatechZombieKillPawn>(GetOwningPlayerController()->GetPawn());
 	if (MyPawn && TextFont)
 	{
+		if(MyPawn->GetCurrentReticle())
+		{
+			CrosshairTex = MyPawn->GetCurrentReticle()->GetResource();
+		}
+		else
+		{
+			CrosshairTex = NULL;
+		}
+		// Draw very simple crosshair
+		if(CrosshairTex)
+		{
+			// find center of the Canvas
+			const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+
+			const FVector2D OffsetFromCenter = MyPawn->GetReticleOffsetFromCenter();
+
+			// offset by designer specified value
+			const FVector2D CrosshairDrawPosition((Center.X + OffsetFromCenter.X), (Center.Y + OffsetFromCenter.Y));
+
+			ReticleCoordinates.X = Center.X;
+			ReticleCoordinates.Y = Center.Y;
+
+			FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex, FLinearColor(MyPawn->GetReticleColor()));
+			TileItem.BlendMode = SE_BLEND_Translucent;
+
+			// draw the reticle
+			Canvas->DrawItem(TileItem);
+		}
+
+		// Set the draw color to white
+		Canvas->SetDrawColor(255, 255, 255);
+
 		float XL, YL;
 		float ScaleX, ScaleY;
 
@@ -68,4 +76,11 @@ void ASunovatechZombieKillHUD::DrawHUD()
 void ASunovatechZombieKillHUD::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ASunovatechZombieKillPawn* MyPawn = Cast<ASunovatechZombieKillPawn>(GetOwningPlayerController()->GetPawn());
+
+	if(MyPawn && MyPawn->GetCurrentReticle())
+	{
+		CrosshairTex = MyPawn->GetCurrentReticle()->GetResource();
+	}
 }

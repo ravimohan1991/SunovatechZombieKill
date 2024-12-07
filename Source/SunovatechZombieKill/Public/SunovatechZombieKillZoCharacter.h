@@ -129,6 +129,21 @@ public:
 	bool IsSprinting() const;
 
 	/**
+	 * @brief Getter for attack melee status
+	 */
+	UFUNCTION(BlueprintCallable, Category = "ZombieSituation")
+	bool IsMeleeAttacking() const { return bIsMeleeAttacking; }
+
+	/**
+	 * @brief Sets the attack status of Zombie
+	 * 
+	 * @todo ATM ASunovatechZombieKillPawn is detecting the overlapwith zombie and applying damage
+	 * on self. Should be done in this class with applying of point damage.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Status")
+	void SetAttack(bool bStatus) { bIsMeleeAttacking = bStatus; }
+
+	/**
 	 * @brief Is player aiming down sights (no practical use, in the project)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Targeting")
@@ -169,14 +184,6 @@ public:
 public:
 
 	/**
-	 * @brief Is zombie attacking by punching
-	 *
-	 * @note Not being used in the project currently
-	 */
-	UPROPERTY(BlueprintReadWrite, Category = "Attacking")
-	bool bIsPunching;
-
-	/**
 	 * @brief The bot behavior we want this bot to execute, (passive/patrol) by specifying EditAnywhere
 	 * we can edit this value per-instance when placed on the map.
 	 */
@@ -192,6 +199,14 @@ public:
 	class UBehaviorTree* BehaviorTree;
 
 protected:
+
+	/**
+	 * @brief Is zombie attacking by punching (melee)
+	 *
+	 * @note Not being used in the project currently
+	 */
+	UPROPERTY(BlueprintReadWrite, Category = "Attacking")
+	bool bIsMeleeAttacking;
 
 	/**
 	 * @brief Resets after sense time-out to avoid unnecessary clearing of target each tick

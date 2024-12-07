@@ -17,6 +17,7 @@ class USpringArmComponent;
 class UInputAction;
 class UChaosWheeledVehicleMovementComponent;
 class ASunovatechZombieKillStProjectile;
+class UTexture2D;
 struct FInputActionValue;
 
 /**
@@ -60,10 +61,10 @@ class ASunovatechZombieKillPawn : public AWheeledVehiclePawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* BackCamera;
 
+protected:
+
 	/** Cast pointer to the Chaos Vehicle movement component */
 	TObjectPtr<UChaosWheeledVehicleMovementComponent> ChaosVehicleMovement;
-
-protected:
 
 	/************************************************************************/
 	/* Input                                                               */
@@ -101,6 +102,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* ResetVehicleAction;
 
+	/** Zooming action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* AimZoomAction;
+
 	/** Projectile class to spawn on shooting */
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	TSubclassOf<ASunovatechZombieKillStProjectile> ProjectileClass;
@@ -117,9 +122,26 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Zombie Interaction")
 	int32 ZombiesAttacking;
 
-	/** Amount of damage to be given cached */
-	//UPROPERTY(BlueprintReadOnly, Category = "Zombie Interaction")
-	//float IndividualZombieDamage;
+	/** Offset from center of screen for reticle */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Reticle")
+	FVector2D OffsetFromCenter;
+
+	/** The reticle to be drawn */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Reticle")
+	UTexture2D* CurrentReticle;
+
+	/** The color of the reticle to be drawn */
+	UPROPERTY(EditDefaultsOnly, Category = "Reticle")
+	FColor ReticleColor;
+
+	/** Caching the original FOV */
+	float OriginalFOV;
+
+	/** Intermediate FOV value during lerping */
+	float LerpingFOV;
+
+	/** Should we zoom? */
+	bool bZoom;
 
 	/** Keeps track of which camera is active */
 	bool bFrontCameraActive = false;
@@ -244,6 +266,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PlayerCondition")
 	bool IsAlive() const;
 
+	/**
+	 * @brief Gets the current active camera being used for the view purpose
+	 * 
+	 * @return Active camera
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Accessories")
+	UCameraComponent* GetActiveCamera() const;
+
+	/**
+	 * @brief Getter for the reticle to be drawn on HUD
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Reticle")
+	UTexture2D* GetCurrentReticle() const { return CurrentReticle; }
+
+	/**
+	 * @brief Getter for reticle color
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Reticle")
+	const FColor& GetReticleColor() const { return ReticleColor; }
+
 protected:
 
 	/** Handles steering input */
@@ -276,12 +318,18 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="Vehicle")
 	void BrakeLights(bool bBraking);
 
+	/** Zooming in of the aim */
+	void ZoomIn(const FInputActionValue& Value);
+
+	/** Zoom out */
+	void ZoomOut(const FInputActionValue& Value);
+
 	/** 
 	 * @brief Fires a projectile.
 	 * 
 	 * @note No network play compatible logic
 	 */
-	void Fire();
+	virtual void Fire();
 
 	/**
 	 * @brief A native event for when play begins for this actor
@@ -308,10 +356,15 @@ public:
 	 * @todo Myabe EditDefaultsOnly should be specified instead?
 	 * @note In my training, I was advised against such public declaration. UE does simillar declarations in some cases though. Needs thinking.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay)
 	FVector MuzzleOffset;
 
 public:
+
+	/** 
+	 * @brief Getter for Reticle offset from center
+	 */
+	FVector2D GetReticleOffsetFromCenter() const { return OffsetFromCenter; }
 
 	/**
 	 * @brief Returns the front spring arm subobject
