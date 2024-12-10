@@ -46,6 +46,9 @@ class SUNOVATECHZOMBIEKILL_API ASunovatechZombieKillAIController : public AAICon
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	FName BotTypeKeyName;
 
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	FName BotMotionKeyName;
+
 public:
 	ASunovatechZombieKillAIController();
 
@@ -58,6 +61,16 @@ public:
 	void SetTargetEnemy(APawn* NewTarget);
 
 	void SetBlackboardBotType(EBotBehaviorType NewType);
+
+	/**
+	 * @brief Getter for blackboard (bb) key
+	 */
+	EZombieMotion GetBBBotMotion() const;
+
+	/**
+	 * @brief Sets the bot's motion status
+	 */
+	void SetBBBotMotion(EZombieMotion BotStatus);
 
 	/** Returns BehaviorComp subobject */
 	FORCEINLINE UBehaviorTreeComponent* GetBehaviorComp() const { return BehaviorComp; }

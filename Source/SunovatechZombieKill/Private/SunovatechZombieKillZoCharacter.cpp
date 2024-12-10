@@ -66,8 +66,8 @@ ASunovatechZombieKillZoCharacter::ASunovatechZombieKillZoCharacter()
 
 	/* By default we will not let the AI patrol, we can override this value per-instance. */
 	BotType = EBotBehaviorType::Passive;
+	ZState = EZombieMotion::Standing;
 	SenseTimeOut = 2.5f;
-
 	bSensedTarget = false;
 	bIsMeleeAttacking = false;
 }
@@ -93,17 +93,48 @@ void ASunovatechZombieKillZoCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	ASunovatechZombieKillAIController* AIController;
+
+	if(GetVelocity().IsZero() && ZState != EZombieMotion::Standing)
+	{
+		ZState = EZombieMotion::Standing;
+
+		AIController = Cast<ASunovatechZombieKillAIController>(GetController());
+
+		if(AIController)
+		{
+			AIController->SetBBBotMotion(ZState);
+		}
+	}
+
+	if(!GetVelocity().IsZero() && ZState == EZombieMotion::Standing)
+	{
+		ZState = EZombieMotion::Walking;
+
+		AIController = Cast<ASunovatechZombieKillAIController>(GetController());
+
+		if(AIController)
+		{
+			AIController->SetBBBotMotion(ZState);
+		}
+	}
+
 	/* Check if the last time we sensed a player (vehicle) is beyond the time out value to prevent zombie from endlessly following a player. */
 	if(bSensedTarget && (GetWorld()->TimeSeconds - LastSeenTime) > SenseTimeOut
 		&& (GetWorld()->TimeSeconds - LastHeardTime) > SenseTimeOut)
 	{
-		ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
+		AIController = Cast<ASunovatechZombieKillAIController>(GetController());
+
 		if(AIController)
 		{
 			bSensedTarget = false;
 
 			/* Reset controller in effect*/
 			AIController->SetTargetEnemy(nullptr);
+
+			/* Stranded zombie :D*/
+			ZState = EZombieMotion::Standing;
+			AIController->SetBBBotMotion(ZState);
 
 			/* Stop playing the hunting sound */
 			BroadcastUpdateAudioLoop(false);
@@ -127,10 +158,28 @@ void ASunovatechZombieKillZoCharacter::OnSeePlayer(APawn* Pawn)
 	LastSeenTime = GetWorld()->GetTimeSeconds();
 	bSensedTarget = true;
 
-	ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
-	if(Pawn && /*Pawn->isalive*/ AIController)
+	if(Pawn)
 	{
-		AIController->SetTargetEnemy(Pawn);
+		FVector RelativeVector = GetActorLocation() - Pawn->GetActorLocation();
+
+		if(RelativeVector.Size() < PawnSensingComp->SightRadius / 2.f)
+		{
+			ZState = EZombieMotion::Walking;
+			Cast<UCharacterMovementComponent>(GetMovementComponent())->MaxWalkSpeed = 600.f;
+		}
+		else if(RelativeVector.Size() < PawnSensingComp->SightRadius)
+		{
+			ZState = EZombieMotion::Running;
+			Cast<UCharacterMovementComponent>(GetMovementComponent())->MaxWalkSpeed = 900.f;
+		}
+
+		ASunovatechZombieKillAIController* AIController = Cast<ASunovatechZombieKillAIController>(GetController());
+
+		if(AIController)
+		{
+			AIController->SetTargetEnemy(Pawn);
+			AIController->SetBBBotMotion(ZState);
+		}
 	}
 }
 

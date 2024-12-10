@@ -184,6 +184,12 @@ public:
 public:
 
 	/**
+	 * @brief Container for zombie's state of motion
+	 */
+	UPROPERTY(BlueprintReadOnly, Category = "AI")
+	EZombieMotion ZState;
+
+	/**
 	 * @brief The bot behavior we want this bot to execute, (passive/patrol) by specifying EditAnywhere
 	 * we can edit this value per-instance when placed on the map.
 	 */
@@ -202,8 +208,6 @@ protected:
 
 	/**
 	 * @brief Is zombie attacking by punching (melee)
-	 *
-	 * @note Not being used in the project currently
 	 */
 	UPROPERTY(BlueprintReadWrite, Category = "Attacking")
 	bool bIsMeleeAttacking;
@@ -274,7 +278,7 @@ protected:
 	UAnimMontage* MeleeAnimMontage;
 
 	/************************************************************************/
-	/* Sounds                                                             */
+	/* Sounds                                                               */
 	/************************************************************************/
 
 	/**
@@ -498,5 +502,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Melee (using overlap)
-	FORCEINLINE float GetMeleeDamage() { return MeleeDamage; }
+	FORCEINLINE float GetMeleeDamage() const { return MeleeDamage; }
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	FORCEINLINE EZombieMotion GetZombieMotionState() const { return ZState; }
 };

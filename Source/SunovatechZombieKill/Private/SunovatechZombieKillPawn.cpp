@@ -253,12 +253,9 @@ void ASunovatechZombieKillPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedCo
 	if(ZombiePawn)
 	{
 		// Goccha
-		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Zombie is overlapping pawn vehicle"));
-
 		ZombiesAttacking += 1;
 		float IndividualZombieDamage = ZombiePawn->GetMeleeDamage();
 
-		UE_LOG(LogSunovatechZombieKill, Log, TEXT("Attacking zombie(s) %d"), ZombiesAttacking);
 		ZombiePawn->SetAttack(true);
 
 		if (!GetWorld()->GetTimerManager().IsTimerActive(HurtTimerHandle))
@@ -274,7 +271,6 @@ void ASunovatechZombieKillPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedCo
 					if (IndividualZombieDamage > 0.f)
 					{
 						Health -= IndividualZombieDamage * ZombiesAttacking;
-						UE_LOG(LogSunovatechZombieKill, Log, TEXT("Hurting by the amount %f"), IndividualZombieDamage * ZombiesAttacking);
 
 						if (Health <= 0)
 						{

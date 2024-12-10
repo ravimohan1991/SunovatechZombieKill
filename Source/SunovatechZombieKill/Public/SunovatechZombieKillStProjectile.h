@@ -18,6 +18,28 @@
  // Think of finding appropriate place for these types
 
 /**
+ * @brief An enum for recording the zombie's state of motion
+ */
+UENUM(Blueprintable)
+enum class EZombieMotion : uint8
+{
+	/**
+	 * @brief Standing state
+	 */
+	Standing,
+
+	/**
+	 * @brief Walking state
+	 */
+	Walking,
+
+	/**
+	 * @brief Running state
+	 */
+	Running,
+};
+
+/**
  * @brief The player inventory enum
  *
  * @note These types have been taken from Tom Looman's https://github.com/tomlooman/EpicSurvivalGame project. Currently, our

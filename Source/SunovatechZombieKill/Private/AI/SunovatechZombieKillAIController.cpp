@@ -14,6 +14,7 @@ ASunovatechZombieKillAIController::ASunovatechZombieKillAIController()
 	PatrolLocationKeyName = "PatrolLocation";
 	CurrentWaypointKeyName = "CurrentWaypoint";
 	BotTypeKeyName = "BotType";
+	BotMotionKeyName = "BotMotion";
 
 	/* Initializes PlayerState so we can assign a team index to AI */
 	// bWantsPlayerState = true;
@@ -35,6 +36,7 @@ void ASunovatechZombieKillAIController::OnPossess(class APawn* InPawn)
 
 		/* Make sure the Blackboard has the type of bot we possessed*/
 		SetBlackboardBotType(ZombieBot->BotType);
+		SetBBBotMotion(ZombieBot->ZState);
 	}
 }
 
@@ -89,11 +91,28 @@ APawn* ASunovatechZombieKillAIController::GetTargetEnemy() const
 	return nullptr;
 }
 
-
 void ASunovatechZombieKillAIController::SetBlackboardBotType(EBotBehaviorType NewType)
 {
 	if (BlackboardComp)
 	{
 		BlackboardComp->SetValueAsEnum(BotTypeKeyName, (uint8)NewType);
+	}
+}
+
+EZombieMotion ASunovatechZombieKillAIController::GetBBBotMotion() const
+{
+	if(BlackboardComp)
+	{
+		return (EZombieMotion)(BlackboardComp->GetValueAsEnum(BotMotionKeyName));
+	}
+
+	return EZombieMotion::Standing;
+}
+
+void ASunovatechZombieKillAIController::SetBBBotMotion(EZombieMotion BotStatus)
+{
+	if(BlackboardComp)
+	{
+		BlackboardComp->SetValueAsEnum(BotMotionKeyName, (uint8)BotStatus);
 	}
 }
